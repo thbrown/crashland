@@ -97,7 +97,7 @@ class Ship extends Actor {
 }
 
 class DirectionalParticle extends Actor {
-  constructor(x, y, angle, count, length, size, color) {
+  constructor(x, y, angle, count, frequency, length, size, color) {
     super();
     this.x = x;
     this.y = y;
@@ -106,18 +106,8 @@ class DirectionalParticle extends Actor {
     this.size = size;
     this.color = color;
     this.particles = [];
-    for (let i = 0; i < count; i++) {
-      this.particles.push(
-        new Particle(
-          this.x,
-          this.y,
-          this.angle,
-          this.length,
-          this.size,
-          this.color
-        )
-      );
-    }
+    this.count = count;
+    this.frequency = frequency;
   }
 
   draw(ctx) {
@@ -126,9 +116,34 @@ class DirectionalParticle extends Actor {
     }
   }
 
+
   update() {
+    let toRemove = [];
     for (let part of this.particles) {
-      part.update();
+      if(part.update()) {
+        toRemove.push(part);
+      }
+    }
+    // Remove dead parts
+    this.particles = this.particles.filter( function( el ) {
+      return toRemove.indexOf( el ) < 0;
+    } );
+
+    // add a new one for each one we removed
+    let random = Math.random();
+    if(random < this.frequency) {
+      for(let i = 0; i < this.count; i++) {
+        this.particles.push(
+          new Particle(
+            this.x,
+            this.y,
+            this.angle,
+            this.length,
+            this.size,
+            this.color
+          )
+        );
+      }
     }
   }
 }
@@ -137,8 +152,6 @@ class Particle extends Actor {
   constructor(x, y, angle, length, size, color) {
     super();
     this.speed = 15;
-    this.origX = x;
-    this.origY = y;
     this.x = x;
     this.y = y;
     this.angle = angle;
@@ -158,18 +171,18 @@ class Particle extends Actor {
   }
 
   update() {
-    this.counter++;
     this.x -=
       this.speed * Math.sin((-this.angle / 360) * 2 * Math.PI) +
       randomIntFromInterval(-4, 4);
     this.y -=
       this.speed * Math.cos((-this.angle / 360) * 2 * Math.PI) +
       randomIntFromInterval(-4, 4);
+    this.size = Math.max(this.size + randomIntFromInterval(0, 3), 0);
+      
+
+    this.counter++;
     if (this.counter > this.length) {
-      this.x = this.origX;
-      this.y = this.origY;
-      this.counter = 0;
+      return true;
     }
-    //console.log(this.counter, this.length, this.x, this.y);
   }
 }

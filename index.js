@@ -57,8 +57,9 @@ function initMainMenu() {
   }
   all.push(new Text(20, 100, "CRASHLAND!", "100px Helvetica"));
   //all.push(new Actor(100, 100));
+  
+  all.push(new DirectionalParticle(500, 400, -45, 2, 1, 20, 5, "red"));
   all.push(new Ship(-100, -100, 135));
-  all.push(new DirectionalParticle(500, 400, -45, 10, 10, 5, "red"));
   return all;
 }
 
