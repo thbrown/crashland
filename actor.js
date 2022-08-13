@@ -76,6 +76,7 @@ class Ship extends Actor {
     this.angle = angle;
     this.xShake = 0;
     this.yShake = 0;
+    this.speed = 0;
   }
 
   draw(ctx) {
@@ -93,6 +94,7 @@ class Ship extends Actor {
   update() {
     this.xShake = randomIntFromInterval(-2, 2);
     this.yShake = randomIntFromInterval(-2, 2);
+    this.y += this.speed;
   }
 }
 
@@ -168,6 +170,35 @@ class Mouse extends Actor {
   update() {}
 }
 
+class Background extends Actor {
+  constructor() {
+    super();
+    this.fadeStart = 999999999;
+    this.color = "black";
+  }
+
+  draw(ctx) {
+    ctx.save();
+    ctx.fillStyle = this.color;
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.restore();
+  }
+
+  update(collisions, globalCounter) {
+    if (this.fadeStart <= globalCounter) {
+      let progress = (globalCounter - this.fadeStart) / 150;
+      if (progress >= 1) {
+        this.color = "rgb(135,206,235)";
+      } else {
+        this.color = getColor(progress, [
+          "rgb(0,0,0)", // Black
+          "rgb(135,206,235)", // Sky Blue
+        ]);this.x += this.speed;
+      }
+    }
+  }
+}
+
 class Future extends Actor {
   constructor(counter, onCounter) {
     super();
@@ -176,14 +207,33 @@ class Future extends Actor {
   }
 
   update(collisions, globalCounter) {
-    if (globalCounter > counter) {
+    if (globalCounter >= this.counter) {
       this.onCounter();
+      return true;
     }
   }
 }
 
+class Rectangle extends Actor {
+  constructor(x,y,w,h,color) {
+    super();
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+    this.color = color;
+  }
+
+  draw(ctx) {
+    ctx.save();
+    ctx.strokeStyle = this.color;
+    ctx.roundRect(this.x, this.y, this.w, this.h, 10).stroke();
+    ctx.restore();
+  }
+}
+
 class DirectionalParticle extends Actor {
-  constructor(x, y, angle, count, frequency, length, size, color) {
+  constructor(x, y, angle, count, frequency, length, size, color, spread) {
     super();
     this.x = x;
     this.y = y;
@@ -194,6 +244,8 @@ class DirectionalParticle extends Actor {
     this.particles = [];
     this.count = count;
     this.frequency = frequency;
+    this.speed = 0;
+    this.spread = spread;
   }
 
   draw(ctx) {
@@ -204,6 +256,10 @@ class DirectionalParticle extends Actor {
 
   update() {
     let toRemove = [];
+
+    this.x += this.speed;
+    this.y += this.speed;
+
     for (let part of this.particles) {
       if (part.update()) {
         toRemove.push(part);
@@ -214,7 +270,7 @@ class DirectionalParticle extends Actor {
       return toRemove.indexOf(el) < 0;
     });
 
-    // add a new one for each one we removed
+    // Add new ones
     let random = Math.random();
     if (random < this.frequency) {
       for (let i = 0; i < this.count; i++) {
@@ -225,7 +281,8 @@ class DirectionalParticle extends Actor {
             this.angle,
             this.length,
             this.size,
-            this.color
+            this.color,
+            this.spread
           )
         );
       }
@@ -234,7 +291,7 @@ class DirectionalParticle extends Actor {
 }
 
 class Particle extends Actor {
-  constructor(x, y, angle, length, size, color) {
+  constructor(x, y, angle, length, size, color, spread) {
     super();
     this.speed = 15;
     this.x = x;
@@ -242,8 +299,10 @@ class Particle extends Actor {
     this.angle = angle;
     this.length = length;
     this.size = size;
-    this.color = color;
+    this.initialColor = color;
+    this.color = color[0];
     this.counter = 0;
+    this.spread = spread;
   }
 
   draw(ctx) {
@@ -258,18 +317,13 @@ class Particle extends Actor {
   update() {
     this.x -=
       this.speed * Math.sin((-this.angle / 360) * 2 * Math.PI) +
-      randomIntFromInterval(-4, 4);
+      randomIntFromInterval(-this.spread, this.spread);
     this.y -=
       this.speed * Math.cos((-this.angle / 360) * 2 * Math.PI) +
-      randomIntFromInterval(-4, 4);
+      randomIntFromInterval(-this.spread, this.spread);
     this.size = Math.max(this.size + randomIntFromInterval(0, 3), 0);
 
-    this.color = getColor(this.counter / this.length, [
-      "rgb(255,0,0)",
-      "rgb(245,158,66)",
-      "rgb(250,241,75)",
-      "rgb(84,84,84)",
-    ]);
+    this.color = getColor(this.counter / this.length, this.initialColor);
 
     this.counter++;
     if (this.counter > this.length) {

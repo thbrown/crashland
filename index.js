@@ -6,9 +6,17 @@ const CELL_SIZE = 30;
 const canvasElem = document.querySelector("canvas");
 const ctx = canvasElem.getContext("2d");
 
+const FIRE_COLORS = [
+  "rgb(255,0,0)",
+  "rgb(245,158,66)",
+  "rgb(250,241,75)",
+  "rgb(84,84,84)",
+];
 const mouse = new Mouse(0, 0);
-let mode = 0;
+const background = new Background();
 let actors = initMainMenu();
+//let actors = initBuild();
+
 
 const SPACE_SHIP =
   new Path2D(`M73.778,188.362l-37.454,5.717c-2.978,0.451-5.941-0.918-7.52-3.484L14.838,167.89c-0.779-1.267-1.135-2.709-1.094-4.144
@@ -25,22 +33,14 @@ c-0.006-0.12-0.018-0.237-0.018-0.358v-48.03c0-4.143,3.358-7.5,7.5-7.5s7.5,3.357,
 
 let globalCounter = 0;
 function clock() {
-  ctx.save();
-  ctx.fillStyle = getColor(globalCounter / 200, [
-    "rgb(0,0,0)", // Black
-    "rgb(135,206,235)", // Sky Blue
-  ]);
   globalCounter++;
-  globalCounter = globalCounter % 200;
 
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
-  ctx.restore();
-
+  // Draw all actors
   for (let actor of actors) {
     actor.draw(ctx);
   }
 
-  // Update loop
+  // Update all actors
   let toRemove = [];
   for (let actor of actors) {
     // Get everything colliding with this actor
@@ -59,6 +59,8 @@ function clock() {
     }
   }
 
+  // console.log(actors.length);
+
   // Remove dead actors
   actors = actors.filter(function (el) {
     return toRemove.indexOf(el) < 0;
@@ -71,6 +73,7 @@ window.requestAnimationFrame(clock);
 
 function initMainMenu() {
   let all = [];
+  all.push(background);
   for (let i = 0; i < 100; i++) {
     all.push(
       new Streak(
@@ -81,20 +84,67 @@ function initMainMenu() {
     );
   }
   all.push(new Text(20, 100, "CRASH LANDING!", "100px Helvetica"));
-  //all.push(new Actor(100, 100));
 
-  all.push(new DirectionalParticle(540, 380, -45, 2, 1, 20, 5, "red"));
-  all.push(new Ship(-100, -100, 135));
+  let particles = new DirectionalParticle(540, 380, -45, 2, 1, 20, 5, FIRE_COLORS, 4);
+  all.push(particles);
+  let ship = new Ship(-100, -100, 135);
+  all.push(ship);
   all.push(
     new Button(960, 600, 300, 100, "Play Now", "black", "white", () => {
       // Start background gradient
+      background.fadeStart = globalCounter;
       // Move Ship
+      ship.speed = -10;
       // Move Particles
-      // Start Explosion
-      // Start Remove all
-      // Start Populate Build Screen
+      particles.speed = 7;
+      // Queue Explosion
+      actors.push(
+        new Future(globalCounter + 140, () => {
+          actors.push(new DirectionalParticle(WIDTH, HEIGHT, -65, 1, 1, 60, 500, FIRE_COLORS, 50))
+        })
+      );
+      // Queue Blackout
+      actors.push(
+        new Future(globalCounter + 240, () => {
+          actors.push(new DirectionalParticle(WIDTH, HEIGHT, -65, 1, 1, 70, 500, ["rgb(0,0,0)","rgb(0,0,0)"], 50))
+        })
+      );
+      // Queue Instructions
+      actors.push(
+        new Future(globalCounter + 310, () => {
+          actors = actors.filter(function (el) {
+            return el.constructor.name === "Future"
+          });
+          actors.push(new Text(20, 320, "Your ship has crashed, but you've escaped death for now...", "40px Helvetica"))
+        })
+      );
+      // Queue Instructions 2
+      actors.push(
+        new Future(globalCounter + 420, () => {
+          actors.push(new Text(20, 360, "Rebuild your ship and escape to the space station to survive.", "40px Helvetica"))
+        })
+      );
+      // Queue Remove all & Show Build Screen
+      actors.push(
+        new Future(globalCounter + 580, () => {
+          actors = initBuild();
+        })
+      );
     })
   );
+  all.push(mouse);
+  return all;
+}
+
+
+function initBuild() {
+  let all = [];
+  background.fadeStart = 999999999;
+  background.color = "black";
+  all.push(background);
+  all.push(new Text(20, 40, "Click and drag the components to rebuild your ship!", "30px Helvetica"));
+  all.push(new Rectangle(50,100,500,HEIGHT - 100 - 50, "white"));
+  all.push(new Rectangle(600,100,500,HEIGHT - 100 - 50, "white"));
   all.push(mouse);
   return all;
 }
@@ -137,8 +187,6 @@ function getColor(percentage, colors) {
   let blue =
     parseInt(colorA[2]) +
     (parseInt(colorB[2]) - parseInt(colorA[2])) * percentageIntoColor;
-
-  //console.log(percentage, percentageIntoColor, red);
 
   return `rgb(${red},${green},${blue})`;
 }
