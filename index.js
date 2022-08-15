@@ -14,9 +14,8 @@ const FIRE_COLORS = [
 ];
 const mouse = new Mouse(0, 0);
 const background = new Background();
-let actors = initMainMenu();
-//let actors = initBuild();
-
+//let actors = initMainMenu();
+let actors = initBuild();
 
 const SPACE_SHIP =
   new Path2D(`M73.778,188.362l-37.454,5.717c-2.978,0.451-5.941-0.918-7.52-3.484L14.838,167.89c-0.779-1.267-1.135-2.709-1.094-4.144
@@ -59,8 +58,6 @@ function clock() {
     }
   }
 
-  // console.log(actors.length);
-
   // Remove dead actors
   actors = actors.filter(function (el) {
     return toRemove.indexOf(el) < 0;
@@ -85,12 +82,22 @@ function initMainMenu() {
   }
   all.push(new Text(20, 100, "CRASH LANDING!", "100px Helvetica"));
 
-  let particles = new DirectionalParticle(540, 380, -45, 2, 1, 20, 5, FIRE_COLORS, 4);
+  let particles = new DirectionalParticle(
+    540,
+    380,
+    -45,
+    2,
+    1,
+    20,
+    5,
+    FIRE_COLORS,
+    4
+  );
   all.push(particles);
   let ship = new Ship(-100, -100, 135);
   all.push(ship);
   all.push(
-    new Button(960, 600, 300, 100, "Play Now", "black", "white", () => {
+    new Button(945, 600, 350, 100, "Play Now", "black", "white", "70px Helvetica", 75, mouse, () => {
       // Start background gradient
       background.fadeStart = globalCounter;
       // Move Ship
@@ -100,28 +107,66 @@ function initMainMenu() {
       // Queue Explosion
       actors.push(
         new Future(globalCounter + 140, () => {
-          actors.push(new DirectionalParticle(WIDTH, HEIGHT, -65, 1, 1, 60, 500, FIRE_COLORS, 50))
+          actors.push(
+            new DirectionalParticle(
+              WIDTH,
+              HEIGHT,
+              -65,
+              1,
+              1,
+              60,
+              500,
+              FIRE_COLORS,
+              50
+            )
+          );
         })
       );
       // Queue Blackout
       actors.push(
         new Future(globalCounter + 240, () => {
-          actors.push(new DirectionalParticle(WIDTH, HEIGHT, -65, 1, 1, 70, 500, ["rgb(0,0,0)","rgb(0,0,0)"], 50))
+          actors.push(
+            new DirectionalParticle(
+              WIDTH,
+              HEIGHT,
+              -65,
+              1,
+              1,
+              70,
+              500,
+              ["rgb(0,0,0)", "rgb(0,0,0)"],
+              50
+            )
+          );
         })
       );
       // Queue Instructions
       actors.push(
         new Future(globalCounter + 310, () => {
           actors = actors.filter(function (el) {
-            return el.constructor.name === "Future"
+            return el.constructor.name === "Future";
           });
-          actors.push(new Text(20, 320, "Your ship has crashed, but you've escaped death for now...", "40px Helvetica"))
+          actors.push(
+            new Text(
+              20,
+              320,
+              "Your ship has crashed, but you've escaped death for now...",
+              "40px Helvetica"
+            )
+          );
         })
       );
       // Queue Instructions 2
       actors.push(
         new Future(globalCounter + 420, () => {
-          actors.push(new Text(20, 360, "Rebuild your ship and escape to the space station to survive.", "40px Helvetica"))
+          actors.push(
+            new Text(
+              20,
+              360,
+              "Rebuild your ship and escape to the space station to survive.",
+              "40px Helvetica"
+            )
+          );
         })
       );
       // Queue Remove all & Show Build Screen
@@ -136,15 +181,37 @@ function initMainMenu() {
   return all;
 }
 
-
 function initBuild() {
   let all = [];
   background.fadeStart = 999999999;
   background.color = "black";
   all.push(background);
-  all.push(new Text(20, 40, "Click and drag the components to rebuild your ship!", "30px Helvetica"));
-  all.push(new Rectangle(50,100,500,HEIGHT - 100 - 50, "white"));
-  all.push(new Rectangle(600,100,500,HEIGHT - 100 - 50, "white"));
+  all.push(
+    new Text(
+      20,
+      40,
+      "Click and drag the components to rebuild your ship! When finished click \"Launch!\"",
+      "30px Helvetica"
+    )
+  );
+  all.push(new Rectangle(50, 70, 550, 550, "white"));
+  all.push(new Rectangle(650, 70, 550, 550, "white"));
+  let grid = new Grid(650, 70, mouse);
+  all.push(grid);
+  for(let i = 0; i < 5; i++) {
+    all.push(new Component(100 + i * 75, 200, mouse, grid));
+  }
+  
+  let commandModule = new Component(500, 500, mouse, grid);
+  all.push(commandModule);
+  grid.addComponent(commandModule, 5, 5, mouse);
+
+  all.push(
+    new Button(1100, 640, 200, 50, "Launch!", "black", "white", "35px Helvetica", 38, mouse, () => {
+      actors = initMainMenu();
+    })
+  );
+
   all.push(mouse);
   return all;
 }
@@ -226,6 +293,15 @@ function collide(actorA, actorB) {
   } else {
     return false;
   }
+}
+
+function isCollidingWith(type, collisions) {
+  for (let col of collisions) {
+    if (col instanceof type) {
+      return true;
+    }
+  }
+  return false;
 }
 
 CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
