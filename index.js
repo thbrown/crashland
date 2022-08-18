@@ -216,10 +216,10 @@ function initBuild() {
   let grid = new Grid(650, 70, mouse);
   all.push(grid);
   for (let i = 0; i < 5; i++) {
-    all.push(new Component(80 + i * 95, 100 + i * 25,0, mouse, grid));
+    all.push(new Component(80 + i * 95, 100 + i * 25,0, mouse, grid, COMP_TYPE[(i%COMP_TYPE.length)]));
   }
 
-  let commandModule = new Component(500, 500, 0, mouse, grid);
+  let commandModule = new Component(500, 500, 0, mouse, grid, COMP_TYPE[0]);
   all.push(commandModule);
   grid.addComponent(commandModule, 5, 5, mouse);
 
@@ -333,6 +333,8 @@ function isCollidingWith(type, collisions) {
   return false;
 }
 
+
+
 CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
   if (w < 2 * r) r = w / 2;
   if (h < 2 * r) r = h / 2;
@@ -360,8 +362,9 @@ canvasElem.addEventListener("mouseup", function (e) {
 
 canvasElem.addEventListener("mousemove", function (e) {
   e.preventDefault();
-  mouse.x = e.x;
-  mouse.y = e.y;
+  var rect = canvas.getBoundingClientRect();
+  mouse.x = e.x - rect.left;
+  mouse.y = e.y - rect.top;
 });
 
 document.addEventListener(

@@ -1,3 +1,22 @@
+function getThrusterPath(dim, wid, ang) {
+  return `m 0 ${dim} l ${dim / 2 - wid / 2} ${-wid} l ${ang} ${ang} l ${-ang} ${
+    wid - ang
+  } h ${wid} l ${-ang} ${-(wid - ang)} l ${ang} ${-ang} l ${
+    dim / 2 - wid / 2
+  } ${wid} v ${-dim} h ${-dim} v ${dim}`;
+}
+const SML_THRUST = new Path2D(getThrusterPath(50, 10, 1));
+const MED_THRUST = new Path2D(getThrusterPath(50, 16, 3));
+const LAR_THRUST = new Path2D(getThrusterPath(50, 30, 5));
+const COMMAND = new Path2D(`m 0 50 h 50 v -50 h -50 v 50`);
+
+const COMP_TYPE = [
+  { name: "Command Module", sprite: COMMAND, attach: [1, 1, 1, 1] },
+  { name: "Small Thruster", sprite: SML_THRUST, attach: [1, 1, 1, 0] },
+  { name: "Medium Thruster", sprite: MED_THRUST, attach: [1, 1, 1, 0] },
+  { name: "Large Thruster", sprite: LAR_THRUST, attach: [1, 1, 1, 0] },
+];
+
 class Actor {
   constructor(x, y, shape) {
     this.x = x;
@@ -390,7 +409,7 @@ class Rotate extends Actor {
 }
 
 class Component extends Actor {
-  constructor(x, y, angle, mouse, grid) {
+  constructor(x, y, angle, mouse, grid, type) {
     super();
     this.x = x;
     this.y = y;
@@ -400,7 +419,7 @@ class Component extends Actor {
     this.collide = true;
     this.mouse = mouse;
     this.grid = grid;
-    this.rot = new Rotate(50,0,this);
+    this.rot = new Rotate(50, 0, this);
     this.onRelease = function () {
       let targetLocation = this.grid.getClosestValidLocation(this.x, this.y);
       if (targetLocation === undefined) {
@@ -413,6 +432,7 @@ class Component extends Actor {
       this.grid.addComponent(this, locX, locY);
     };
     this.rotToggle = true;
+    this.type = type;
   }
 
   draw(ctx) {
@@ -421,60 +441,55 @@ class Component extends Actor {
     ctx.strokeStyle = "white";
     ctx.lineWidth = 3;
 
-
-
     ctx.save();
-    
-
-    //ctx.translate(-this.x, -this.y);
-
-    ctx.translate( this.x + this.w/2, this.y + this.h/2);
-
-
-
-
+    ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
     ctx.rotate((this.angle * Math.PI) / 180);
 
-    /*
-        ctx.strokeStyle = "orange";
-    ctx.roundRect(this.x, this.y, this.w, this.h, 5).fill();
-    ctx.roundRect(this.x, this.y, this.w, this.h, 5).stroke();
-    ctx.strokeStyle = "white";
-    */
-
-        
-
     ctx.strokeStyle = this.color;
-    ctx.roundRect(-this.w/2, -this.h/2, this.w, this.h, 5).fill();
-    ctx.roundRect(-this.w/2, -this.h/2, this.w, this.h, 5).stroke();
-    
+    ctx.roundRect(-this.w / 2, -this.h / 2, this.w, this.h, 5).fill();
+    ctx.roundRect(-this.w / 2, -this.h / 2, this.w, this.h, 5).stroke();
+
     ctx.beginPath();
     ctx.moveTo(0, 0);
-    ctx.lineTo(0, -this.h/2);
+    ctx.lineTo(0, -this.h / 2);
     ctx.stroke();
 
+    // Draw
+    ctx.translate(-this.w / 2, -this.h / 2);
+    ctx.fillStyle = "gold";
 
-    
+    ctx.fill(this.type.sprite);
+    //ctx.fill(MED_THRUST);
+
     ctx.restore();
 
+
     ctx.fillStyle = "white";
-    ctx.font = "15px Helvetica";
+    ctx.font = "16px Helvetica";
     if (!this.grid.getKey(this)) {
-      ctx.fillText("Small Thruster", this.x, this.y - 10);
+      ctx.fillText(this.type.name, this.x, this.y - 10);
       this.rot.draw(ctx);
-      if(collide(this.mouse, this.rot) && this.mouse.click) {
-        if(this.rotToggle) {
+      if (
+        collide(this.mouse, this.rot) &&
+        this.mouse.click &&
+        this.mouse.dragged === undefined
+      ) {
+        if (this.rotToggle) {
           this.angle = (this.angle + 90) % 360;
-          console.log(this.angle);
           this.rotToggle = false;
-        }        
+        }
       } else {
         this.rotToggle = true;
       }
     }
 
+    ctx.fillStyle = "black";
+    ctx.fillRect(this.x + 18, this.y + 15, 15, 17);
+    ctx.roundRect(this.x + 18, this.y + 15, 15, 17).fill();
+    ctx.fillStyle = "white";
+    ctx.font = "15px Helvetica";
     ctx.fillText("X", this.x + this.w / 2.5, this.y + this.h / 1.7);
-    
+
     ctx.restore();
   }
 
@@ -643,7 +658,7 @@ class Grid extends Actor {
       }
     }
 
-    // TODO: Find the closest highlighted component, if it's withing some range, highlight it! or animate it!
+    // TODO: Find the closest highlighted component, if it's within some range, highlight it! or animate it!
 
     ctx.restore();
   }
