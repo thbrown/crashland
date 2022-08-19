@@ -6,12 +6,13 @@ import { Future } from "./actors/Future.js";
 import { Grid } from "./actors/Grid.js";
 import { Mouse } from "./actors/Mouse.js";
 import { Rectangle } from "./actors/Rectangle.js";
-import { Ship } from "./actors/Ship.js";
+import { MenuShip } from "./actors/MenuShip.js";
 import { Streak } from "./actors/Streak.js";
 import { Text } from "./actors/Text.js";
+import { Keyboard } from "./actors/Keyboard.js";
 
 import { WIDTH, HEIGHT } from "./Constants.js";
-import { randomIntFromInterval, collide } from "./Utils.js";
+import { randomIntFromInterval, collide, randomLetter } from "./Utils.js";
 
 const canvasElem = document.querySelector("canvas");
 const ctx = canvasElem.getContext("2d");
@@ -24,8 +25,9 @@ const FIRE_COLORS = [
 ];
 const mouse = new Mouse(0, 0);
 const background = new Background();
-let actors = initMainMenu();
-//let actors = initBuild();
+const keyboard = new Keyboard();
+//let actors = initMainMenu();
+let actors = initBuild();
 
 let globalCounter = 0;
 function clock() {
@@ -38,6 +40,7 @@ function clock() {
 
   // Update all actors
   let toRemove = [];
+
   for (let actor of actors) {
     // Get everything colliding with this actor
     let collisions = [];
@@ -50,7 +53,7 @@ function clock() {
       }
     }
 
-    if (actor.update(collisions, globalCounter)) {
+    if (actor.update(collisions, globalCounter, actors)) {
       toRemove.push(actor);
     }
   }
@@ -77,7 +80,7 @@ function initMainMenu() {
       )
     );
   }
-  all.push(new Text(20, 100, "Ship Resurrection", "100px Helvetica"));
+  all.push(new Text(20, 100, "Spaceship Resurrection", "100px Helvetica"));
 
   let particles = new DirectionalParticle(
     540,
@@ -114,7 +117,7 @@ function initMainMenu() {
         particles.speed = 7;
         // Queue Explosion
         actors.push(
-          new Future(globalCounter + 140, () => {
+          new Future(globalCounter, 120, keyboard, () => {
             actors.push(
               new DirectionalParticle(
                 WIDTH,
@@ -128,59 +131,88 @@ function initMainMenu() {
                 50
               )
             );
-          })
-        );
-        // Queue Blackout
-        actors.push(
-          new Future(globalCounter + 240, () => {
+            // Queue Blackout
             actors.push(
-              new DirectionalParticle(
-                WIDTH,
-                HEIGHT,
-                -65,
-                1,
-                1,
-                70,
-                500,
-                ["rgb(0,0,0)", "rgb(0,0,0)"],
-                50
-              )
+              new Future(globalCounter, 100, keyboard, () => {
+                actors.push(
+                  new DirectionalParticle(
+                    WIDTH,
+                    HEIGHT,
+                    -65,
+                    1,
+                    1,
+                    70,
+                    500,
+                    ["rgb(0,0,0)", "rgb(0,0,0)"],
+                    50
+                  )
+                );
+                // Queue Instructions
+                actors.push(
+                  new Future(globalCounter, 90, keyboard, () => {
+                    actors = actors.filter(function (el) {
+                      return el.constructor.name === "Future";
+                    });
+                    actors.push(
+                      new Rectangle(0, 0, WIDTH, HEIGHT, "black", true)
+                    );
+                    actors.push(
+                      new Text(
+                        20,
+                        270,
+                        "You've crashed on a hostile planet, but you've escaped death for now...",
+                        "39px Helvetica"
+                      )
+                    );
+                    // Queue Instructions 2
+                    actors.push(
+                      new Future(globalCounter, 180, keyboard, () => {
+                        actors.push(
+                          new Text(
+                            20,
+                            310,
+                            "However, the same can't be said for your spaceship.",
+                            "39px Helvetica"
+                          )
+                        );
+                        // Queue Instructions 2
+                        actors.push(
+                          new Future(globalCounter, 180, keyboard, () => {
+                            actors.push(
+                              new Text(
+                                20,
+                                400,
+                                "Rebuild your ship and escape to the space station to survive.",
+                                "39px Helvetica"
+                              )
+                            );
+                            actors.push(
+                              new Text(
+                                20,
+                                490,
+                                "[Press any key to continue]",
+                                "39px Helvetica"
+                              )
+                            );
+                            // Queue Remove All & Show Build Screen
+                            actors.push(
+                              new Future(
+                                globalCounter,
+                                undefined,
+                                keyboard,
+                                () => {
+                                  actors = initBuild();
+                                }
+                              )
+                            );
+                          })
+                        );
+                      })
+                    );
+                  })
+                );
+              })
             );
-          })
-        );
-        // Queue Instructions
-        actors.push(
-          new Future(globalCounter + 310, () => {
-            actors = actors.filter(function (el) {
-              return el.constructor.name === "Future";
-            });
-            actors.push(
-              new Text(
-                20,
-                320,
-                "Your ship has crashed, but you've escaped death for now, but the same can't be said for your ship.",
-                "40px Helvetica"
-              )
-            );
-          })
-        );
-        // Queue Instructions 2
-        actors.push(
-          new Future(globalCounter + 420, () => {
-            actors.push(
-              new Text(
-                20,
-                360,
-                "Rebuild your ship and escape to the space station to survive.",
-                "40px Helvetica"
-              )
-            );
-          })
-        );
-        // Queue Remove All & Show Build Screen
-        actors.push(
-          new Future(globalCounter + 580, () => {
-            actors = initBuild();
           })
         );
       }
@@ -215,7 +247,8 @@ function initBuild() {
         0,
         mouse,
         grid,
-        COMP_TYPE[i % COMP_TYPE.length]
+        COMP_TYPE[randomIntFromInterval(1, COMP_TYPE.length - 1)],
+        randomLetter()
       )
     );
   }
@@ -237,11 +270,22 @@ function initBuild() {
       38,
       mouse,
       () => {
-        actors = initMainMenu();
+        actors = initFly(grid);
       }
     )
   );
 
+  all.push(mouse);
+  return all;
+}
+
+function initFly(grid) {
+  let all = [];
+  background.fadeStart = undefined;
+  background.color = "black";
+  all.push(background);
+  all.push(new Text(20, 40, "The space station is up", "30px Helvetica"));
+  all.push(new Ship(grid));
   all.push(mouse);
   return all;
 }
@@ -279,13 +323,11 @@ CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
 canvasElem.addEventListener("mousedown", function (e) {
   e.preventDefault();
   mouse.click = true;
-  console.log("Click DOWN");
 });
 
 canvasElem.addEventListener("mouseup", function (e) {
   e.preventDefault();
   mouse.click = false;
-  console.log("Click UP");
 });
 
 canvasElem.addEventListener("mousemove", function (e) {
@@ -298,7 +340,17 @@ canvasElem.addEventListener("mousemove", function (e) {
 document.addEventListener(
   "keydown",
   (event) => {
-    console.log("Press");
+    //console.log("Down", event.key);
+    keyboard.add(event.key);
+  },
+  false
+);
+
+document.addEventListener(
+  "keyup",
+  (event) => {
+    //console.log("Up", event.key);
+    keyboard.remove(event.key);
   },
   false
 );

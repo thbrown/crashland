@@ -1,14 +1,21 @@
 import { Actor } from "./Actor";
 
+const MIN = 10;
+
 export class Future extends Actor {
-  constructor(counter, onCounter) {
+  constructor(counter, diff, keyboard, onCounter) {
     super();
     this.counter = counter;
     this.onCounter = onCounter;
+    this.diff = diff;
+    this.keyboard = keyboard;
   }
 
   update(collisions, globalCounter) {
-    if (globalCounter >= this.counter) {
+    if (
+      globalCounter >= this.counter + this.diff ||
+      (globalCounter > this.counter + MIN && this.keyboard.keys.size > 0)
+    ) {
       this.onCounter();
       return true;
     }

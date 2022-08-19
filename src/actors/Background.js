@@ -5,7 +5,7 @@ import { getColor } from "../Utils.js";
 export class Background extends Actor {
   constructor() {
     super();
-    this.fadeStart = 99999999999;
+    this.fadeStart = undefined;
     this.color = "black";
   }
 
@@ -17,7 +17,7 @@ export class Background extends Actor {
   }
 
   update(collisions, globalCounter) {
-    if (this.fadeStart <= globalCounter) {
+    if (this.fadeStart && this.fadeStart <= globalCounter) {
       let progress = (globalCounter - this.fadeStart) / 150;
       if (progress >= 1) {
         this.color = "rgb(135,206,235)";

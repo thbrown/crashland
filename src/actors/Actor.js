@@ -5,9 +5,7 @@ export class Actor {
     this.shape = shape;
   }
 
-  draw(ctx) {
-    return true;
-  }
+  draw(ctx) {}
 
   update() {}
 }

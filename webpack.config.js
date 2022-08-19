@@ -1,5 +1,6 @@
 const path = require("path");
-var ZipPlugin = require("zip-webpack-plugin");
+const ZipPlugin = require("zip-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
   entry: "./src/index.js",
@@ -8,8 +9,12 @@ module.exports = {
     path: path.resolve(__dirname, "dist"),
   },
   watch: process.argv.indexOf("--watch") > -1,
-  optimization: {
-    minimize: process.argv.indexOf("--min") > -1,
-  },
-  plugins: [new ZipPlugin({})],
+  plugins: [
+    new ZipPlugin({
+      include: [/\.js$/, /\.html$/],
+    }),
+    new HtmlWebpackPlugin({
+      template: "./index.html",
+    }),
+  ],
 };

@@ -37,7 +37,13 @@ export class Grid extends Actor {
     // BFS on components to find valid neighbor locations
     if (Object.keys(this.components).length === 0) {
       // TODO: all locations valid if nothing is on the grid? OR make command module immovable?
-      return [];
+      let allPositions = [];
+      for (let i = 0; i < this.num; i++) {
+        for (let j = 0; j < this.num; j++) {
+          allPositions.push(`${i},${j}`);
+        }
+      }
+      return allPositions;
     }
 
     let start = Object.keys(this.components)[0];

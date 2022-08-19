@@ -1,19 +1,26 @@
 import { Actor } from "./Actor";
 
 export class Rectangle extends Actor {
-  constructor(x, y, w, h, color) {
+  constructor(x, y, w, h, color, fill) {
     super();
     this.x = x;
     this.y = y;
     this.w = w;
     this.h = h;
     this.color = color;
+    this.fill = fill;
   }
 
   draw(ctx) {
     ctx.save();
-    ctx.strokeStyle = this.color;
-    ctx.roundRect(this.x, this.y, this.w, this.h, 10).stroke();
+    let rect = ctx.roundRect(this.x, this.y, this.w, this.h, 10);
+    if (this.fill) {
+      ctx.fillStyle = this.color;
+      rect.fill();
+    } else {
+      ctx.strokeStyle = this.color;
+      rect.stroke();
+    }
     ctx.restore();
   }
 }

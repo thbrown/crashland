@@ -14,6 +14,9 @@ function getThrusterPath(dim, wid, ang) {
 const SML_THRUST = new Path2D(getThrusterPath(50, 10, 1));
 const MED_THRUST = new Path2D(getThrusterPath(50, 16, 3));
 const LAR_THRUST = new Path2D(getThrusterPath(50, 30, 5));
+const CARGO = new Path2D(
+  `m 0 0 v 20 h 20 v 10 h -20 v 20 h 20v -20h 10 v 20 h 20 v -20h -20 v -10 h 20 v -20 h -20 v 20 h -10 v -20 h -20`
+);
 const COMMAND = new Path2D(`m 0 50 h 50 v -50 h -50 v 50`);
 
 export const COMP_TYPE = [
@@ -21,10 +24,29 @@ export const COMP_TYPE = [
   { name: "Small Thruster", sprite: SML_THRUST, attach: [1, 1, 1, 0] },
   { name: "Medium Thruster", sprite: MED_THRUST, attach: [1, 1, 1, 0] },
   { name: "Large Thruster", sprite: LAR_THRUST, attach: [1, 1, 1, 0] },
+  { name: "Cargo Container", sprite: CARGO, attach: [1, 1, 1, 1] },
+];
+
+export const TYPES = [
+  () => {
+    return new CommandModule();
+  },
+  () => {
+    return new SmallThruster();
+  },
+  () => {
+    return new MediumThruster();
+  },
+  () => {
+    return new LargeThruster();
+  },
+  () => {
+    return new CargoContainer();
+  },
 ];
 
 export class Component extends Actor {
-  constructor(x, y, angle, mouse, grid, type) {
+  constructor(x, y, angle, mouse, grid, type, key) {
     super();
     this.x = x;
     this.y = y;
@@ -48,6 +70,7 @@ export class Component extends Actor {
     };
     this.rotToggle = true;
     this.type = type;
+    this.key = key;
   }
 
   draw(ctx) {
@@ -64,20 +87,19 @@ export class Component extends Actor {
     ctx.roundRect(-this.w / 2, -this.h / 2, this.w, this.h, 5).fill();
     ctx.roundRect(-this.w / 2, -this.h / 2, this.w, this.h, 5).stroke();
 
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(0, -this.h / 2);
-    ctx.stroke();
+    // Rotation calibration line, points up by default
+    //ctx.beginPath();
+    //ctx.moveTo(0, 0);
+    //ctx.lineTo(0, -this.h / 2);
+    //ctx.stroke();
 
     // Draw
     ctx.translate(-this.w / 2, -this.h / 2);
     ctx.fillStyle = "gold";
-
     ctx.fill(this.type.sprite);
-    //ctx.fill(MED_THRUST);
-
     ctx.restore();
 
+    // Draw label and rotation icon
     ctx.fillStyle = "white";
     ctx.font = "16px Helvetica";
     if (!this.grid.getKey(this)) {
@@ -97,12 +119,15 @@ export class Component extends Actor {
       }
     }
 
-    ctx.fillStyle = "black";
-    ctx.fillRect(this.x + 18, this.y + 15, 15, 17);
-    ctx.roundRect(this.x + 18, this.y + 15, 15, 17).fill();
-    ctx.fillStyle = "white";
-    ctx.font = "15px Helvetica";
-    ctx.fillText("X", this.x + this.w / 2.5, this.y + this.h / 1.7);
+    // Draw activation key press
+    if (this.key) {
+      ctx.fillStyle = "black";
+      ctx.fillRect(this.x + 18, this.y + 15, 15, 17);
+      ctx.roundRect(this.x + 18, this.y + 15, 15, 17).fill();
+      ctx.fillStyle = "white";
+      ctx.font = "15px Helvetica";
+      ctx.fillText(this.key, this.x + this.w / 2.5, this.y + this.h / 1.7);
+    }
 
     ctx.restore();
   }
