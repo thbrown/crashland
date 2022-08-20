@@ -1,52 +1,11 @@
-import { Actor } from "./Actor";
-import { Rotate } from "./Rotate";
-import { Mouse } from "./Mouse.js";
+import { Actor } from "../Actor";
+import { Rotate } from "../Rotate";
+import { Mouse } from "../Mouse";
 
-import { collide, isCollidingWith } from "../Utils.js";
-
-function getThrusterPath(dim, wid, ang) {
-  return `m 0 ${dim} l ${dim / 2 - wid / 2} ${-wid} l ${ang} ${ang} l ${-ang} ${
-    wid - ang
-  } h ${wid} l ${-ang} ${-(wid - ang)} l ${ang} ${-ang} l ${
-    dim / 2 - wid / 2
-  } ${wid} v ${-dim} h ${-dim} v ${dim}`;
-}
-const SML_THRUST = new Path2D(getThrusterPath(50, 10, 1));
-const MED_THRUST = new Path2D(getThrusterPath(50, 16, 3));
-const LAR_THRUST = new Path2D(getThrusterPath(50, 30, 5));
-const CARGO = new Path2D(
-  `m 0 0 v 20 h 20 v 10 h -20 v 20 h 20v -20h 10 v 20 h 20 v -20h -20 v -10 h 20 v -20 h -20 v 20 h -10 v -20 h -20`
-);
-const COMMAND = new Path2D(`m 0 50 h 50 v -50 h -50 v 50`);
-
-export const COMP_TYPE = [
-  { name: "Command Module", sprite: COMMAND, attach: [1, 1, 1, 1] },
-  { name: "Small Thruster", sprite: SML_THRUST, attach: [1, 1, 1, 0] },
-  { name: "Medium Thruster", sprite: MED_THRUST, attach: [1, 1, 1, 0] },
-  { name: "Large Thruster", sprite: LAR_THRUST, attach: [1, 1, 1, 0] },
-  { name: "Cargo Container", sprite: CARGO, attach: [1, 1, 1, 1] },
-];
-
-export const TYPES = [
-  () => {
-    return new CommandModule();
-  },
-  () => {
-    return new SmallThruster();
-  },
-  () => {
-    return new MediumThruster();
-  },
-  () => {
-    return new LargeThruster();
-  },
-  () => {
-    return new CargoContainer();
-  },
-];
+import { collide, isCollidingWith } from "../../Utils.js";
 
 export class Component extends Actor {
-  constructor(x, y, angle, mouse, grid, type, key) {
+  constructor(x, y, angle, mouse, grid, key) {
     super();
     this.x = x;
     this.y = y;
@@ -65,11 +24,9 @@ export class Component extends Actor {
       let locSplit = targetLocation.split(",");
       let locX = parseInt(locSplit[0]);
       let locY = parseInt(locSplit[1]);
-
       this.grid.addComponent(this, locX, locY);
     };
     this.rotToggle = true;
-    this.type = type;
     this.key = key;
   }
 
@@ -96,14 +53,14 @@ export class Component extends Actor {
     // Draw
     ctx.translate(-this.w / 2, -this.h / 2);
     ctx.fillStyle = "gold";
-    ctx.fill(this.type.sprite);
+    ctx.fill(this.getSprite());
     ctx.restore();
 
     // Draw label and rotation icon
     ctx.fillStyle = "white";
     ctx.font = "16px Helvetica";
     if (!this.grid.getKey(this)) {
-      ctx.fillText(this.type.name, this.x, this.y - 10);
+      ctx.fillText(this.getName(), this.x, this.y - 10);
       this.rot.draw(ctx);
       if (
         collide(this.mouse, this.rot) &&

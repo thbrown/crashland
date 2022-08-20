@@ -1,6 +1,6 @@
 import { Background } from "./actors/Background.js";
 import { Button } from "./actors/Button.js";
-import { Component, COMP_TYPE } from "./actors/Component.js";
+import { newComponent, getCount } from "./actors/components/ComponentFactory";
 import { DirectionalParticle } from "./actors/DirectionalParticle.js";
 import { Future } from "./actors/Future.js";
 import { Grid } from "./actors/Grid.js";
@@ -10,19 +10,14 @@ import { MenuShip } from "./actors/MenuShip.js";
 import { Streak } from "./actors/Streak.js";
 import { Text } from "./actors/Text.js";
 import { Keyboard } from "./actors/Keyboard.js";
+import { Ship } from "./actors/Ship.js";
 
-import { WIDTH, HEIGHT } from "./Constants.js";
+import { WIDTH, HEIGHT, FIRE_COLORS } from "./Constants.js";
 import { randomIntFromInterval, collide, randomLetter } from "./Utils.js";
 
 const canvasElem = document.querySelector("canvas");
 const ctx = canvasElem.getContext("2d");
 
-const FIRE_COLORS = [
-  "rgb(255,0,0)",
-  "rgb(245,158,66)",
-  "rgb(250,241,75)",
-  "rgb(84,84,84)",
-];
 const mouse = new Mouse(0, 0);
 const background = new Background();
 const keyboard = new Keyboard();
@@ -94,7 +89,7 @@ function initMainMenu() {
     4
   );
   all.push(particles);
-  let ship = new Ship(-100, -100, 135);
+  let ship = new MenuShip(-100, -100, 135);
   all.push(ship);
   all.push(
     new Button(
@@ -241,19 +236,19 @@ function initBuild() {
   all.push(grid);
   for (let i = 0; i < 5; i++) {
     all.push(
-      new Component(
+      newComponent(
         80 + i * 95,
         100 + i * 25,
         0,
         mouse,
         grid,
-        COMP_TYPE[randomIntFromInterval(1, COMP_TYPE.length - 1)],
-        randomLetter()
+        randomLetter(),
+        randomIntFromInterval(1, getCount() - 1)
       )
     );
   }
 
-  let commandModule = new Component(500, 500, 0, mouse, grid, COMP_TYPE[0]);
+  let commandModule = newComponent(500, 500, 0, mouse, grid, null, 0);
   all.push(commandModule);
   grid.addComponent(commandModule, 5, 5, mouse);
 
@@ -285,7 +280,7 @@ function initFly(grid) {
   background.color = "black";
   all.push(background);
   all.push(new Text(20, 40, "The space station is up", "30px Helvetica"));
-  all.push(new Ship(grid));
+  all.push(new Ship(WIDTH / 2, (HEIGHT * 2) / 3, grid));
   all.push(mouse);
   return all;
 }

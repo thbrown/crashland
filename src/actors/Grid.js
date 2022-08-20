@@ -1,11 +1,11 @@
 import { Actor } from "./Actor";
+import { DIM } from "../Constants";
 
 export class Grid extends Actor {
   constructor(x, y, mouse) {
     super();
     this.x = x;
     this.y = y;
-    this.dim = 50;
     this.num = 11;
     this.mouse = mouse;
     this.components = {};
@@ -21,8 +21,8 @@ export class Grid extends Actor {
       let locX = parseInt(locSplit[0]);
       let locY = parseInt(locSplit[1]);
       let dist = Math.sqrt(
-        Math.pow(x - (this.x + locX * this.dim), 2) +
-          Math.pow(y - (this.y + locY * this.dim), 2)
+        Math.pow(x - (this.x + locX * DIM), 2) +
+          Math.pow(y - (this.y + locY * DIM), 2)
       );
 
       if (dist < minValue && dist < MIN_DISTANCE) {
@@ -82,8 +82,8 @@ export class Grid extends Actor {
 
   addComponent(toAdd, x, y) {
     // First snap the component to the grid
-    toAdd.x = this.x + this.dim * x;
-    toAdd.y = this.y + this.dim * y;
+    toAdd.x = this.x + DIM * x;
+    toAdd.y = this.y + DIM * y;
 
     // Then add the component to the list
     let key = `${x},${y}`;
@@ -106,16 +106,16 @@ export class Grid extends Actor {
     // Horizontal Lines
     for (let i = 0; i < this.num; i++) {
       ctx.beginPath();
-      ctx.moveTo(this.x, this.y + this.dim * i);
-      ctx.lineTo(this.x + this.dim * this.num, this.y + this.dim * i);
+      ctx.moveTo(this.x, this.y + DIM * i);
+      ctx.lineTo(this.x + DIM * this.num, this.y + DIM * i);
       ctx.stroke();
     }
 
     // Vertical Lines
     for (let i = 0; i < this.num; i++) {
       ctx.beginPath();
-      ctx.moveTo(this.x + this.dim * i, this.y);
-      ctx.lineTo(this.x + this.dim * i, this.y + this.dim * this.num);
+      ctx.moveTo(this.x + DIM * i, this.y);
+      ctx.lineTo(this.x + DIM * i, this.y + DIM * this.num);
       ctx.stroke();
     }
     */
@@ -134,18 +134,18 @@ export class Grid extends Actor {
         let locY = parseInt(locSplit[1]);
 
         if (location === closestValidLocation) {
-          ctx.strokeStyle = "green";
-        } else {
           ctx.strokeStyle = "red";
+        } else {
+          ctx.strokeStyle = "grey";
         }
         ctx.lineWidth = 3;
         const shrink = 6;
         ctx
           .roundRect(
-            this.x + this.dim * locX + shrink / 2,
-            this.y + this.dim * locY + shrink / 2,
-            this.dim - shrink,
-            this.dim - shrink,
+            this.x + DIM * locX + shrink / 2,
+            this.y + DIM * locY + shrink / 2,
+            DIM - shrink,
+            DIM - shrink,
             5
           )
           .stroke();

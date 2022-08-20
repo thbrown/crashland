@@ -80,3 +80,11 @@ export function randomLetter() {
   }
   return result;
 }
+
+export function getThrusterSprite(dim, wid, ang) {
+  return `m 0 ${dim} l ${dim / 2 - wid / 2} ${-wid} l ${ang} ${ang} l ${-ang} ${
+    wid - ang
+  } h ${wid} l ${-ang} ${-(wid - ang)} l ${ang} ${-ang} l ${
+    dim / 2 - wid / 2
+  } ${wid} v ${-dim} h ${-dim} v ${dim}`;
+}
