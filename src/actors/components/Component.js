@@ -5,7 +5,7 @@ import { Mouse } from "../Mouse";
 import { collide, isCollidingWith } from "../../Utils.js";
 
 export class Component extends Actor {
-  constructor(x, y, angle, mouse, grid, key) {
+  constructor(x, y, angle, mouse, grid, key, keyboard) {
     super();
     this.x = x;
     this.y = y;
@@ -28,6 +28,7 @@ export class Component extends Actor {
     };
     this.rotToggle = true;
     this.key = key;
+    this.keyboard = keyboard;
   }
 
   draw(ctx) {

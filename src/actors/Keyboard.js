@@ -8,7 +8,7 @@ export class Keyboard extends Actor {
   }
 
   has(has) {
-    this.keys.has(has);
+    return this.keys.has(has);
   }
 
   add(toAdd) {

@@ -73,7 +73,7 @@ export function isCollidingWith(type, collisions) {
 export function randomLetter() {
   let length = 1;
   let result = "";
-  let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let characters = "abcdefghijklmnopqrstuvwxyz0123456789"; //"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; // Add Shift?? <- this is funny , Also TODO: press shift 6 times to win!
   let charactersLength = characters.length;
   for (let i = 0; i < length; i++) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));

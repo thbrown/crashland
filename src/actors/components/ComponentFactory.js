@@ -17,7 +17,16 @@ export function getCount() {
 }
 
 // Component factory
-export function newComponent(x, y, angle, mouse, grid, key, typeIndex) {
+export function newComponent(
+  x,
+  y,
+  angle,
+  mouse,
+  grid,
+  key,
+  typeIndex,
+  keyboard
+) {
   let Type = TYPES[typeIndex];
-  return new Type(x, y, angle, mouse, grid, key);
+  return new Type(x, y, angle, mouse, grid, key, keyboard);
 }

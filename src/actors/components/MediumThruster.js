@@ -5,8 +5,8 @@ import { FIRE_COLORS } from "../../Constants.js";
 import { getThrusterSprite } from "../../Utils.js";
 
 export class MediumThruster extends Component {
-  constructor(x, y, angle, mouse, grid, key) {
-    super(x, y, angle, mouse, grid, key);
+  constructor(x, y, angle, mouse, grid, key, keyboard) {
+    super(x, y, angle, mouse, grid, key, keyboard);
 
     this.particles = new DirectionalParticle(
       this.x,
@@ -34,7 +34,9 @@ export class MediumThruster extends Component {
   }
 
   draw(ctx) {
-    this.particles.draw(ctx);
+    if (this.keyboard.has(this.key)) {
+      this.particles.draw(ctx);
+    }
     super.draw(ctx);
   }
 

@@ -1,8 +1,8 @@
 import { Component } from "./Component";
 
 export class CommandModule extends Component {
-  constructor(x, y, angle, mouse, grid, key) {
-    super(x, y, angle, mouse, grid, key);
+  constructor(x, y, angle, mouse, grid, key, keyboard) {
+    super(x, y, angle, mouse, grid, key, keyboard);
   }
 
   getName() {

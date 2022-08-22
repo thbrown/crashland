@@ -2,9 +2,10 @@ import { Actor } from "./Actor";
 import { DIM } from "../Constants";
 
 export class Ship extends Actor {
-  constructor(x, y, grid) {
+  constructor(x, y, grid, keyboard) {
     super();
     this.parts = [];
+    this.keyboard = keyboard;
 
     // Add all components
     for (let compKey of Object.keys(grid.components)) {
@@ -54,6 +55,26 @@ export class Ship extends Actor {
     }
     console.log(xSum / items.length, ySum / items.length);
     return { x: xSum / items.length, y: ySum / items.length };
+  }
+
+  // http://hyperphysics.phy-astr.gsu.edu/hbase/mi.html
+  // For simplicity we'll treat each square as a circle (i.e. whole mass of square is treated as a point mass at the square's center)
+  _getMomentOfInertia(items, com) {
+    let xCom = com.x;
+    let yCom = com.y;
+
+    let moi = 0;
+    for (let item of items) {
+      let itemCenterX = item.x + item.w / 2;
+      let itemCenterY = item.y + item.h / 2;
+      let dist = Math.sqrt(
+        Math.pow(itemCenterX - xCom, 2) + Math.pow(itemCenterY - yCom, 2)
+      );
+
+      // Assume the mass of each square is 1
+      moi += 1 * dist * dist;
+    }
+    return moi;
   }
 
   draw(ctx) {

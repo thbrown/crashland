@@ -243,7 +243,8 @@ function initBuild() {
         mouse,
         grid,
         randomLetter(),
-        randomIntFromInterval(1, getCount() - 1)
+        randomIntFromInterval(1, getCount() - 1),
+        keyboard
       )
     );
   }
@@ -280,7 +281,7 @@ function initFly(grid) {
   background.color = "black";
   all.push(background);
   all.push(new Text(20, 40, "The space station is up", "30px Helvetica"));
-  all.push(new Ship(WIDTH / 2, (HEIGHT * 2) / 3, grid));
+  all.push(new Ship(WIDTH / 2, (HEIGHT * 2) / 3, grid, keyboard));
   all.push(mouse);
   return all;
 }
