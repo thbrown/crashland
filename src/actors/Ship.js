@@ -1,6 +1,8 @@
 import { Actor } from "./Actor";
 import { DIM } from "../Constants";
-import { toRad } from "../Utils";
+import { toDeg, toRad } from "../Utils";
+
+const mass = 10; // mass of one tile/square/part/component
 
 export class Ship extends Actor {
   constructor(x, y, grid, keyboard) {
@@ -18,6 +20,9 @@ export class Ship extends Actor {
       part.y = locY * DIM;
       this.parts.push(part);
     }
+
+    // Calc mass
+    this.mass = this.parts.length * mass;
 
     // Calc bounding box
     let minX = this.parts.reduce(function (prev, curr) {
@@ -37,8 +42,8 @@ export class Ship extends Actor {
 
     // Components coordinates are relative to the ship
     for (let part of this.parts) {
-      part.x = part.x - (minX);
-      part.y = part.y - (minY);
+      part.x = part.x - minX;
+      part.y = part.y - minY;
     }
 
     // Calc center of mass
@@ -80,16 +85,15 @@ export class Ship extends Actor {
       );
 
       // Treating all squares as circles for simplicity
-      if(dist < DIM) {
+      if (dist < DIM) {
         // What if COM is inside the circle??
         // COM of flat disk = .5*m*r^2 (http://hyperphysics.phy-astr.gsu.edu/hbase/tdisc.html)
-        let circleMoi = .5*1*Math.pow(DIM,2);
+        let circleMoi = 0.5 * 1 * Math.pow(DIM, 2);
         // parallel axis theorem: I_s = I_cm + m*d^2
-        moi += circleMoi + (1) * Math.pow(dist, 2);
+        moi += circleMoi + 1 * Math.pow(dist, 2);
       } else {
         // Component is not inside the COM
-        // Assume the mass of each square has a mass of 1 (and is a point mass)
-        moi += 1 * dist * dist;
+        moi += mass * dist * dist;
       }
     }
     return moi;
@@ -105,8 +109,8 @@ export class Ship extends Actor {
     // Make the center of the ship the origin
     ctx.translate(this.x + this.COM.x, this.y + this.COM.y);
     ctx.rotate((this.theta * Math.PI) / 180);
-    ctx.translate(- this.COM.x, - this.COM.y); // Keep drawing from top-left corner
-    
+    ctx.translate(-this.COM.x, -this.COM.y); // Keep drawing from top-left corner
+
     for (let part of this.parts) {
       part.draw(ctx);
     }
@@ -125,24 +129,21 @@ export class Ship extends Actor {
       part.update(collisions, globalCounter);
     }
 
-    // Now determine how much each component affects the ship's velocity
+    // Now determine how much each component affects the ship's translational and angular velocity
     for (let part of this.parts) {
-
       let thrust = part.getThrust();
+      let xVelDelta =
+        (thrust * Math.sin(toRad(part.angle + this.theta))) / this.mass;
+      let yVelDelta =
+        (-thrust * Math.cos(toRad(part.angle + this.theta))) / this.mass;
 
-      let xVelDelta = thrust * Math.sin(toRad(part.angle + this.theta));
-      let yVelDelta = -thrust * Math.cos(toRad(part.angle + this.theta));
+      let distToCOMx = this.COM.x - (part.x + part.w / 2);
+      let distToCOMy = this.COM.y - (part.y + part.h / 2);
 
-      //console.log(this.COM.x, this.COM.y, part.x, part.y, part.h, part.w, Math.pow(this.COM.x - (part.x + part.w/2)), Math.pow(this.COM.y - (part.y + part.h/2)));
-      let distToCOMx = this.COM.x - (part.x + part.w/2);
-      let distToCOMy = this.COM.y - (part.y + part.h/2);
-
-      let mass = 1;
-
-      let changeX = distToCOMx*thrust*mass*Math.cos(toRad(part.angle));
-      let changeY = distToCOMy*thrust*mass*Math.sin(toRad(part.angle));
-      this.vTheta += (changeX + changeY)/1;
-
+      // W_f = l * P / I
+      let changeX = distToCOMx * thrust * Math.cos(toRad(part.angle));
+      let changeY = distToCOMy * thrust * Math.sin(toRad(part.angle));
+      this.vTheta += toDeg(changeX + changeY) / this.I;
       this.vx += xVelDelta;
       this.vy += yVelDelta;
     }
@@ -152,5 +153,4 @@ export class Ship extends Actor {
     this.y += this.vy;
     this.theta += this.vTheta;
   }
-  
 }

@@ -50,7 +50,7 @@ export class LargeThruster extends Component {
 
   getThrust() {
     if (this.keyboard.has(this.key)) {
-      return 0.01;
+      return 1;
     }
     return 0;
   }
