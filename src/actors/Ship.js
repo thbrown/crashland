@@ -1,5 +1,6 @@
 import { Actor } from "./Actor";
 import { DIM } from "../Constants";
+import { toRad } from "../Utils";
 
 export class Ship extends Actor {
   constructor(x, y, grid, keyboard) {
@@ -21,24 +22,32 @@ export class Ship extends Actor {
     // Calc bounding box
     let minX = this.parts.reduce(function (prev, curr) {
       return prev.x < curr.x ? prev : curr;
-    });
+    }).x;
     let maxX = this.parts.reduce(function (prev, curr) {
       return prev.x > curr.x ? prev : curr;
-    });
+    }).x;
     let minY = this.parts.reduce(function (prev, curr) {
       return prev.y < curr.y ? prev : curr;
-    });
+    }).y;
     let maxY = this.parts.reduce(function (prev, curr) {
       return prev.y > curr.y ? prev : curr;
-    });
-    this.w = maxX.x - minX.x + DIM;
-    this.h = maxY.y - minY.y + DIM;
+    }).y;
+    this.w = maxX - minX + DIM;
+    this.h = maxY - minY + DIM;
+
+    // Components coordinates are relative to the ship
+    for (let part of this.parts) {
+      part.x = part.x - (minX);
+      part.y = part.y - (minY);
+    }
 
     // Calc center of mass
-    let COM = this._getCenterOfMass(this.parts);
+    this.COM = this._getCenterOfMass(this.parts);
+    this.I = this._getMomentOfInertia(this.parts, this.COM);
+    console.log(this.I);
 
-    this.x = COM.x - this.w / 2;
-    this.y = COM.y - this.h / 2;
+    this.x = x; //this.COM.x - this.w / 2;
+    this.y = y; //this.COM.y - this.h / 2;
     this.theta = 0;
 
     this.vx = 0;
@@ -53,7 +62,6 @@ export class Ship extends Actor {
       xSum += item.x + item.w / 2;
       ySum += item.y + item.h / 2;
     }
-    console.log(xSum / items.length, ySum / items.length);
     return { x: xSum / items.length, y: ySum / items.length };
   }
 
@@ -71,8 +79,18 @@ export class Ship extends Actor {
         Math.pow(itemCenterX - xCom, 2) + Math.pow(itemCenterY - yCom, 2)
       );
 
-      // Assume the mass of each square is 1
-      moi += 1 * dist * dist;
+      // Treating all squares as circles for simplicity
+      if(dist < DIM) {
+        // What if COM is inside the circle??
+        // COM of flat disk = .5*m*r^2 (http://hyperphysics.phy-astr.gsu.edu/hbase/tdisc.html)
+        let circleMoi = .5*1*Math.pow(DIM,2);
+        // parallel axis theorem: I_s = I_cm + m*d^2
+        moi += circleMoi + (1) * Math.pow(dist, 2);
+      } else {
+        // Component is not inside the COM
+        // Assume the mass of each square has a mass of 1 (and is a point mass)
+        moi += 1 * dist * dist;
+      }
     }
     return moi;
   }
@@ -84,14 +102,20 @@ export class Ship extends Actor {
     ctx.roundRect(this.x, this.y, this.w, this.h, 10).fill();
     ctx.roundRect(this.x, this.y, this.w, this.h, 10).stroke();
 
+    // Make the center of the ship the origin
+    ctx.translate(this.x + this.COM.x, this.y + this.COM.y);
+    ctx.rotate((this.theta * Math.PI) / 180);
+    ctx.translate(- this.COM.x, - this.COM.y); // Keep drawing from top-left corner
+    
     for (let part of this.parts) {
       part.draw(ctx);
     }
 
     // Point at COM
     ctx.beginPath();
-    ctx.arc(this.x + this.w / 2, this.y + this.h / 2, 2, 0, 2 * Math.PI);
+    ctx.arc(this.COM.x, this.COM.y, 2, 0, 2 * Math.PI);
     ctx.stroke();
+    ctx.fill();
 
     ctx.restore();
   }
@@ -100,5 +124,33 @@ export class Ship extends Actor {
     for (let part of this.parts) {
       part.update(collisions, globalCounter);
     }
+
+    // Now determine how much each component affects the ship's velocity
+    for (let part of this.parts) {
+
+      let thrust = part.getThrust();
+
+      let xVelDelta = thrust * Math.sin(toRad(part.angle + this.theta));
+      let yVelDelta = -thrust * Math.cos(toRad(part.angle + this.theta));
+
+      //console.log(this.COM.x, this.COM.y, part.x, part.y, part.h, part.w, Math.pow(this.COM.x - (part.x + part.w/2)), Math.pow(this.COM.y - (part.y + part.h/2)));
+      let distToCOMx = this.COM.x - (part.x + part.w/2);
+      let distToCOMy = this.COM.y - (part.y + part.h/2);
+
+      let mass = 1;
+
+      let changeX = distToCOMx*thrust*mass*Math.cos(toRad(part.angle));
+      let changeY = distToCOMy*thrust*mass*Math.sin(toRad(part.angle));
+      this.vTheta += (changeX + changeY)/1;
+
+      this.vx += xVelDelta;
+      this.vy += yVelDelta;
+    }
+
+    // Now apply velocity to the ship
+    this.x += this.vx;
+    this.y += this.vy;
+    this.theta += this.vTheta;
   }
+  
 }

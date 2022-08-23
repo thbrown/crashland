@@ -107,4 +107,9 @@ export class Component extends Actor {
     }
     this.rot.update();
   }
+
+
+  getThrust() {
+    return 0;
+  }
 }

@@ -88,3 +88,7 @@ export function getThrusterSprite(dim, wid, ang) {
     dim / 2 - wid / 2
   } ${wid} v ${-dim} h ${-dim} v ${dim}`;
 }
+
+export function toRad(deg) {
+  return deg * (Math.PI / 180);
+}
