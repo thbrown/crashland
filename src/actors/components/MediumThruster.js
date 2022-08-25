@@ -47,4 +47,11 @@ export class MediumThruster extends Component {
     this.particles.angle = this.angle + 180;
     this.particles.update(collisions, globalCounter);
   }
+
+  getThrust() {
+    if (this.keyboard.has(this.key)) {
+      return 5;
+    }
+    return 0;
+  }
 }

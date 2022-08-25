@@ -1,6 +1,6 @@
 import { Actor } from "./Actor";
 
-import { randomIntFromInterval } from "../Utils.js";
+import { randomIntFromInterval, toRad } from "../Utils.js";
 import { WIDTH, HEIGHT } from "../Constants.js";
 
 const SPACE_SHIP =
@@ -30,7 +30,7 @@ export class MenuShip extends Actor {
   draw(ctx) {
     ctx.save();
     ctx.translate(WIDTH / 2, HEIGHT / 2);
-    ctx.rotate((this.angle * Math.PI) / 180);
+    ctx.rotate(toRad(this.angle));
     ctx.translate(this.x + this.xShake, this.y + this.yShake);
     ctx.lineWidth = 3;
     ctx.fillStyle = "white";

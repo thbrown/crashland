@@ -96,3 +96,10 @@ export function toRad(deg) {
 export function toDeg(rad) {
   return rad * (180 / Math.PI);
 }
+
+export function createTransform(ctx, originX, originY, rotation, scale) {
+  var x, y;
+  x = Math.cos(rotation) * scale;
+  y = Math.sin(rotation) * scale;
+  ctx.setTransform(x, y, -y, x, originX, originY);
+}

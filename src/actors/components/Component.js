@@ -2,7 +2,7 @@ import { Actor } from "../Actor";
 import { Rotate } from "../Rotate";
 import { Mouse } from "../Mouse";
 
-import { collide, isCollidingWith } from "../../Utils.js";
+import { collide, isCollidingWith, toRad } from "../../Utils.js";
 
 export class Component extends Actor {
   constructor(x, y, angle, mouse, grid, key, keyboard) {
@@ -39,7 +39,7 @@ export class Component extends Actor {
 
     ctx.save();
     ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
-    ctx.rotate((this.angle * Math.PI) / 180);
+    ctx.rotate(toRad(this.angle));
 
     ctx.strokeStyle = this.color;
     ctx.roundRect(-this.w / 2, -this.h / 2, this.w, this.h, 5).fill();

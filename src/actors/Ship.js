@@ -2,7 +2,7 @@ import { Actor } from "./Actor";
 import { DIM } from "../Constants";
 import { toDeg, toRad } from "../Utils";
 
-const mass = 10; // mass of one tile/square/part/component
+const mass = 100; // mass of one tile/square/part/component
 
 export class Ship extends Actor {
   constructor(x, y, grid, keyboard) {
@@ -88,9 +88,9 @@ export class Ship extends Actor {
       if (dist < DIM) {
         // What if COM is inside the circle??
         // COM of flat disk = .5*m*r^2 (http://hyperphysics.phy-astr.gsu.edu/hbase/tdisc.html)
-        let circleMoi = 0.5 * 1 * Math.pow(DIM, 2);
+        let circleMoi = 0.5 * mass * Math.pow(DIM, 2);
         // parallel axis theorem: I_s = I_cm + m*d^2
-        moi += circleMoi + 1 * Math.pow(dist, 2);
+        moi += circleMoi + mass * Math.pow(dist, 2);
       } else {
         // Component is not inside the COM
         moi += mass * dist * dist;
@@ -102,13 +102,18 @@ export class Ship extends Actor {
   draw(ctx) {
     ctx.save();
     ctx.fillStyle = "white";
-    ctx.strokeStyle = "green";
+    ctx.strokeStyle = "red";
     ctx.roundRect(this.x, this.y, this.w, this.h, 10).fill();
     ctx.roundRect(this.x, this.y, this.w, this.h, 10).stroke();
 
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 2, 0, 2 * Math.PI);
+    ctx.stroke();
+    ctx.fill();
+
     // Make the center of the ship the origin
     ctx.translate(this.x + this.COM.x, this.y + this.COM.y);
-    ctx.rotate((this.theta * Math.PI) / 180);
+    ctx.rotate(toRad(this.theta));
     ctx.translate(-this.COM.x, -this.COM.y); // Keep drawing from top-left corner
 
     for (let part of this.parts) {
@@ -116,6 +121,8 @@ export class Ship extends Actor {
     }
 
     // Point at COM
+    ctx.fillStyle = "white";
+    ctx.strokeStyle = "green";
     ctx.beginPath();
     ctx.arc(this.COM.x, this.COM.y, 2, 0, 2 * Math.PI);
     ctx.stroke();
@@ -146,6 +153,9 @@ export class Ship extends Actor {
       this.vTheta += toDeg(changeX + changeY) / this.I;
       this.vx += xVelDelta;
       this.vy += yVelDelta;
+
+
+      // Determine new w/h
     }
 
     // Now apply velocity to the ship

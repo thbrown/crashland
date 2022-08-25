@@ -13,7 +13,13 @@ import { Keyboard } from "./actors/Keyboard.js";
 import { Ship } from "./actors/Ship.js";
 
 import { WIDTH, HEIGHT, FIRE_COLORS } from "./Constants.js";
-import { randomIntFromInterval, collide, randomLetter } from "./Utils.js";
+import {
+  randomIntFromInterval,
+  collide,
+  randomLetter,
+  toRad,
+  createTransform,
+} from "./Utils.js";
 
 const canvasElem = document.querySelector("canvas");
 const ctx = canvasElem.getContext("2d");
@@ -21,6 +27,9 @@ const ctx = canvasElem.getContext("2d");
 const mouse = new Mouse(0, 0);
 const background = new Background();
 const keyboard = new Keyboard();
+
+let centeredActor = undefined;
+
 //let actors = initMainMenu();
 let actors = initBuild();
 
@@ -28,10 +37,32 @@ let globalCounter = 0;
 function clock() {
   globalCounter++;
 
+  // Clear the canvas first
+  ctx.fillStyle = "grey";
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+  // Adjust camera position to center ship (if enabled)
+  ctx.save();
+  if (centeredActor) {
+    // TODO - assuming centeredActor is always a Ship, fix (COM)
+    let xTrans = centeredActor.x + centeredActor.COM.x;
+    let yTrans = centeredActor.y + centeredActor.COM.y;
+
+    ctx.translate(WIDTH/2,HEIGHT/2); // We want the ship at the center of the screen, not at the top left corner
+    ctx.rotate(-toRad(centeredActor.theta)); // Comment this out if we don't want fixed rotation
+    ctx.translate(-xTrans, -yTrans);
+
+  }
+
   // Draw all actors
   for (let actor of actors) {
+    ctx.save();
     actor.draw(ctx);
+    ctx.restore();
   }
+
+  // Restore centered
+  ctx.restore();
 
   // Update all actors
   let toRemove = [];
@@ -64,6 +95,7 @@ function clock() {
 window.requestAnimationFrame(clock);
 
 function initMainMenu() {
+  centeredActor = undefined;
   let all = [];
   all.push(background);
   for (let i = 0; i < 100; i++) {
@@ -218,8 +250,9 @@ function initMainMenu() {
 }
 
 function initBuild() {
+  centeredActor = undefined;
   let all = [];
-  background.fadeStart = 999999999;
+  background.fadeStart = undefined;
   background.color = "black";
   all.push(background);
   all.push(
@@ -277,31 +310,16 @@ function initBuild() {
 
 function initFly(grid) {
   let all = [];
-  background.fadeStart = undefined;
+  background.fadeStart = -1;
   background.color = "black";
   all.push(background);
   all.push(new Text(20, 40, "The space station is up", "30px Helvetica"));
-  all.push(new Ship(WIDTH / 2, (HEIGHT * 2) / 3, grid, keyboard));
+  let ship = new Ship(WIDTH / 2, (HEIGHT * 2) / 3, grid, keyboard);
+  all.push(ship);
   all.push(mouse);
+  centeredActor = ship;
   return all;
 }
-
-/*
-function getMousePosition(canvas, event) {
-  let rect = canvas.getBoundingClientRect();
-  let x = event.clientX - rect.left;
-  let y = event.clientY - rect.top;
-
-  let cellX = Math.floor(x / CELL_SIZE);
-  let cellY = Math.floor(y / CELL_SIZE);
-  if (cells[cellY] && cells[cellY][cellX]) {
-    if (event.button == 1) {
-      cells[cellY][cellX] = new Cell(0, cellX, cellY, true);
-    } else {
-      cells[cellY][cellX] = new Cell(10000, cellX, cellY);
-    }
-  }
-}*/
 
 CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
   if (w < 2 * r) r = w / 2;
