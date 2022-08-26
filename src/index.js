@@ -11,6 +11,8 @@ import { Streak } from "./actors/Streak.js";
 import { Text } from "./actors/Text.js";
 import { Keyboard } from "./actors/Keyboard.js";
 import { Ship } from "./actors/Ship.js";
+import { PlanetGround } from "./actors/PlanetGround.js";
+import { PlanetAtmosphere } from "./actors/PlanetAtmosphere.js";
 
 import { WIDTH, HEIGHT, FIRE_COLORS } from "./Constants.js";
 import {
@@ -37,6 +39,8 @@ let globalCounter = 0;
 function clock() {
   globalCounter++;
 
+  const scale = 1;
+
   // Clear the canvas first
   ctx.fillStyle = "grey";
   ctx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -48,8 +52,10 @@ function clock() {
     let xTrans = centeredActor.x + centeredActor.COM.x;
     let yTrans = centeredActor.y + centeredActor.COM.y;
 
+
     ctx.translate(WIDTH/2,HEIGHT/2); // We want the ship at the center of the screen, not at the top left corner
-    ctx.rotate(-toRad(centeredActor.theta)); // Comment this out if we don't want fixed rotation
+    ctx.scale(scale, scale);
+    //ctx.rotate(-toRad(centeredActor.theta)); // Comment this out if we don't want fixed rotation
     ctx.translate(-xTrans, -yTrans);
 
   }
@@ -310,11 +316,12 @@ function initBuild() {
 
 function initFly(grid) {
   let all = [];
-  background.fadeStart = -1;
-  background.color = "black";
-  all.push(background);
-  all.push(new Text(20, 40, "The space station is up", "30px Helvetica"));
   let ship = new Ship(WIDTH / 2, (HEIGHT * 2) / 3, grid, keyboard);
+
+  all.push(new PlanetGround());
+  all.push(new PlanetAtmosphere(ship));
+
+  all.push(new Text(20, 40, "The space station is up", "30px Helvetica"));
   all.push(ship);
   all.push(mouse);
   centeredActor = ship;

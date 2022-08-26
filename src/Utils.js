@@ -1,4 +1,10 @@
 export function getColor(percentage, colors) {
+  if (percentage <= 0) {
+    return colors[0];
+  } else if (percentage >= 1) {
+    return colors[colors.length - 1];
+  }
+
   // Convert colors from string to rgb array
   let rgbColors = [];
   for (let color of colors) {
