@@ -21,9 +21,6 @@ export class PlanetAtmosphere extends Actor {
   draw(ctx) {
     ctx.fillStyle = "black";
 
-
-
-
     ctx.scale(1, -1);
 
     // Draw the full sky

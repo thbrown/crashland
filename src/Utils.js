@@ -109,3 +109,7 @@ export function createTransform(ctx, originX, originY, rotation, scale) {
   y = Math.sin(rotation) * scale;
   ctx.setTransform(x, y, -y, x, originX, originY);
 }
+
+export function pthag(x, y) {
+  return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+}

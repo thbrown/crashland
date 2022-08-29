@@ -162,5 +162,9 @@ export class Ship extends Actor {
     this.x += this.vx;
     this.y += this.vy;
     this.theta += this.vTheta;
+
+    // Update bounding box
+    //this.w = ;
+    //this.h = ;
   }
 }

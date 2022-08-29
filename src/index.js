@@ -13,6 +13,10 @@ import { Keyboard } from "./actors/Keyboard.js";
 import { Ship } from "./actors/Ship.js";
 import { PlanetGround } from "./actors/PlanetGround.js";
 import { PlanetAtmosphere } from "./actors/PlanetAtmosphere.js";
+import { SpaceStation } from "./actors/SpaceStation.js";
+import { HUD } from "./actors/HUD.js";
+import { Speedometer } from "./actors/Speedometer.js";
+import { StationTracker } from "./actors/StationTracker.js";
 
 import { WIDTH, HEIGHT, FIRE_COLORS } from "./Constants.js";
 import {
@@ -29,6 +33,7 @@ const ctx = canvasElem.getContext("2d");
 const mouse = new Mouse(0, 0);
 const background = new Background();
 const keyboard = new Keyboard();
+const hud = new HUD();
 
 let centeredActor = undefined;
 
@@ -39,7 +44,7 @@ let globalCounter = 0;
 function clock() {
   globalCounter++;
 
-  const scale = 1;
+  const scale = 1; // TODO multiply WIDTH and HEIGHT by scale when necessary! and move this to the constants file.
 
   // Clear the canvas first
   ctx.fillStyle = "grey";
@@ -52,16 +57,15 @@ function clock() {
     let xTrans = centeredActor.x + centeredActor.COM.x;
     let yTrans = centeredActor.y + centeredActor.COM.y;
 
-
-    ctx.translate(WIDTH/2,HEIGHT/2); // We want the ship at the center of the screen, not at the top left corner
+    ctx.translate(WIDTH / 2, HEIGHT / 2); // We want the ship at the center of the screen, not at the top left corner
     ctx.scale(scale, scale);
     //ctx.rotate(-toRad(centeredActor.theta)); // Comment this out if we don't want fixed rotation
     ctx.translate(-xTrans, -yTrans);
-
   }
 
   // Draw all actors
   for (let actor of actors) {
+    //console.log("DRAW", globalCounter);
     ctx.save();
     actor.draw(ctx);
     ctx.restore();
@@ -70,7 +74,11 @@ function clock() {
   // Restore centered
   ctx.restore();
 
+  // Draw the HUD without any axis transforms
+  hud.draw(ctx);
+
   // Update all actors
+  hud.update(null, globalCounter);
   let toRemove = [];
 
   for (let actor of actors) {
@@ -101,6 +109,7 @@ function clock() {
 window.requestAnimationFrame(clock);
 
 function initMainMenu() {
+  hud.clear();
   centeredActor = undefined;
   let all = [];
   all.push(background);
@@ -256,6 +265,7 @@ function initMainMenu() {
 }
 
 function initBuild() {
+  hud.clear();
   centeredActor = undefined;
   let all = [];
   background.fadeStart = undefined;
@@ -272,6 +282,62 @@ function initBuild() {
   all.push(new Rectangle(50, 70, 550, 550, "white"));
   all.push(new Rectangle(650, 70, 550, 550, "white"));
   let grid = new Grid(650, 70, mouse);
+  grid.addComponent(
+    newComponent(
+      1,
+      1,
+      0,
+      mouse,
+      grid,
+      randomLetter(),
+      3, //randomIntFromInterval(1, getCount() - 1),
+      keyboard
+    ),
+    5+0,
+    5+1
+  );
+  grid.addComponent(
+    newComponent(
+      1,
+      1,
+      90,
+      mouse,
+      grid,
+      randomLetter(),
+      3, //randomIntFromInterval(1, getCount() - 1),
+      keyboard
+    ),
+    5-1,
+    5+0
+  );
+  grid.addComponent(
+    newComponent(
+      1,
+      1,
+      180,
+      mouse,
+      grid,
+      randomLetter(),
+      3, //randomIntFromInterval(1, getCount() - 1),
+      keyboard
+    ),
+    5+0,
+    5-1
+  );
+  grid.addComponent(
+    newComponent(
+      1,
+      1,
+      270,
+      mouse,
+      grid,
+      randomLetter(),
+      3, //randomIntFromInterval(1, getCount() - 1),
+      keyboard
+    ),
+    5+1,
+    5+0
+  );
   all.push(grid);
   for (let i = 0; i < 5; i++) {
     all.push(
@@ -282,7 +348,7 @@ function initBuild() {
         mouse,
         grid,
         randomLetter(),
-        randomIntFromInterval(1, getCount() - 1),
+        3, //randomIntFromInterval(1, getCount() - 1),
         keyboard
       )
     );
@@ -315,15 +381,21 @@ function initBuild() {
 }
 
 function initFly(grid) {
+  hud.clear();
   let all = [];
   let ship = new Ship(WIDTH / 2, (HEIGHT * 2) / 3, grid, keyboard);
+  let station = new SpaceStation(600, 400, ship);
 
   all.push(new PlanetGround());
   all.push(new PlanetAtmosphere(ship));
+  all.push(station);
 
-  all.push(new Text(20, 40, "The space station is up", "30px Helvetica"));
+  hud.add(new Speedometer(20, HEIGHT - 20, ship));
+  hud.add(new StationTracker(ship, station, mouse));
+
   all.push(ship);
   all.push(mouse);
+  //hud.add(mouse);
   centeredActor = ship;
   return all;
 }

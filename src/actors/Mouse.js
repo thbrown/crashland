@@ -1,4 +1,5 @@
 import { Actor } from "./Actor";
+import { WIDTH, HEIGHT } from "../Constants";
 
 export class Mouse extends Actor {
   constructor(x, y) {
@@ -6,8 +7,8 @@ export class Mouse extends Actor {
     this.x = x;
     this.y = y;
     this.collide = true;
-    this.w = 2;
-    this.h = 2;
+    this.w = 3;
+    this.h = 3;
   }
 
   draw(ctx) {

@@ -11,3 +11,8 @@ export const FIRE_COLORS = [
   "rgb(250,241,75)",
   "rgb(84,84,84)",
 ];
+
+// Pixels per meter, for display purposes
+export const PPM = 50;
+
+export const FPS = 60;
