@@ -9,6 +9,7 @@ export class Future extends Actor {
     this.onCounter = onCounter;
     this.diff = diff;
     this.keyboard = keyboard;
+    this.executed = false;
   }
 
   update(collisions, globalCounter) {
@@ -16,6 +17,7 @@ export class Future extends Actor {
       globalCounter >= this.counter + this.diff ||
       (globalCounter > this.counter + MIN && this.keyboard.keys.size > 0)
     ) {
+      
       this.onCounter();
       return true;
     }

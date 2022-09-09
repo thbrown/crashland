@@ -4,7 +4,7 @@ export class HUD extends Actor {
   constructor() {
     super();
     this.elements = [];
-  };
+  }
 
   clear() {
     this.elements = [];
@@ -15,7 +15,7 @@ export class HUD extends Actor {
   }
 
   draw(ctx) {
-    for(let element of this.elements) {
+    for (let element of this.elements) {
       ctx.save();
       element.draw(ctx);
       ctx.restore();
@@ -23,8 +23,16 @@ export class HUD extends Actor {
   }
 
   update(collisions, globalCounter) {
-    for(let element of this.elements) {
-      element.update(collisions, globalCounter);
+    let toRemove = [];
+    for (let element of this.elements) {
+      if (element.update(collisions, globalCounter)) {
+        toRemove.push(element);
+      }
     }
+
+    // Remove dead actors
+    this.elements = this.elements.filter(function (el) {
+      return toRemove.indexOf(el) < 0;
+    });
   }
 }

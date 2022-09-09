@@ -1,4 +1,5 @@
 import { Actor } from "./Actor";
+import { collideRectPt } from "../Utils";
 import { WIDTH, HEIGHT } from "../Constants";
 
 export class Mouse extends Actor {

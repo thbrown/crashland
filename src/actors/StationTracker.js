@@ -15,8 +15,8 @@ export class StationTracker extends Actor {
     let shipX = this.ship.x + this.ship.COM.x;
     let shipY = this.ship.y + this.ship.COM.y;
 
-    let stationX = this.station.x + this.station.w / 2;
-    let stationY = this.station.y + this.station.h / 2;
+    let stationX = this.station.x + this.station.sw / 2;
+    let stationY = this.station.y + this.station.sh / 2;
 
     let xDist = shipX - stationX;
     let yDist = shipY - stationY;

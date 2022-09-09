@@ -113,3 +113,19 @@ export function createTransform(ctx, originX, originY, rotation, scale) {
 export function pthag(x, y) {
   return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
 }
+
+// Assuming rectangle isn't rotated
+export function collideRectPt(x,y, actor) {
+  const buff = .001;
+  let Ax = actor.x;
+  let Ay = actor.y;
+  let Cx = actor.x + actor.w;
+  let Cy = actor.y + actor.h;
+  let area = (Math.abs(Ax - x) * actor.h + Math.abs(Ay - y) * actor.w + Math.abs(Cy - y) * actor.w + Math.abs(Cx - x) * actor.h) / 2;
+  let rectArea = actor.w * actor.h;
+  return area > (rectArea+buff) ? false : true;
+}
+
+export function randomRange(min, max) {
+  return Math.random() * (max - min) + min;
+}

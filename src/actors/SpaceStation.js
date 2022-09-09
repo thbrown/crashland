@@ -1,6 +1,13 @@
 import { Actor } from "./Actor";
+import { isCollidingWith } from "../Utils";
+import { Ship } from "./Ship";
+import { collideRectPt } from "../Utils";
+import { DIM } from "../Constants";
+import { Confetti } from "./Confetti";
+import { SlideScreen } from "./SlideScreen";
 
-const SPACE_STATION = new Path2D(`M502.467,7.533h-153.6c-5.12,0-8.533,3.413-8.533,8.533v25.6H305.47C301.375,17.533,280.253-1,255-1
+const SPACE_STATION =
+  new Path2D(`M502.467,7.533h-153.6c-5.12,0-8.533,3.413-8.533,8.533v25.6H305.47C301.375,17.533,280.253-1,255-1
 c-25.253,0-46.375,18.533-50.47,42.667h-34.863v-25.6c0-5.12-3.413-8.533-8.533-8.533H7.533C2.413,7.533-1,10.947-1,16.067
 v68.267c0,5.12,3.413,8.533,8.533,8.533h153.6c5.12,0,8.533-3.413,8.533-8.533v-25.6h34.863
 c3.623,21.355,20.581,38.313,41.937,41.937v10.351c-14.679,3.814-25.6,17.216-25.6,33.046v8.693
@@ -37,29 +44,169 @@ h-34.133v-8.533c0-9.387,7.68-17.067,17.067-17.067S272.067,134.68,272.067,144.067
 c-18.773,0-34.133-15.36-34.133-34.133S236.227,16.067,255,16.067c18.773,0,34.133,15.36,34.133,34.133
 S273.773,84.333,255,84.333z M357.4,58.733h34.133V75.8H357.4V58.733z M459.8,75.8V58.733h34.133V75.8H459.8z`);
 
+const MARGIN = 40;
+const OFFSET = -10;
+const DOCKING_END = 100;
+
 export class SpaceStation extends Actor {
-  constructor(x,y, ship) {
+  constructor(x, y, ship, onVictory) {
     super();
     this.x = x;
     this.y = y;
-    this.h = 126;
-    this.w = 126;
+    this.sh = 126;
+    this.sw = 126;
+    this.w = this.sh;
+    this.h = this.sw;
     this.ship = ship;
-  };
-
-  draw(ctx) {
-    ctx.fillStyle = "blue";
-    ctx.strokeStyle = "blue";
-    ctx.beginPath();
-    ctx.arc(this.x + this.w/2, this.y + this.h/2, 2, 0, 2 * Math.PI);
-    ctx.stroke();
-    ctx.fill();
-
-    ctx.translate(this.x, this.y);
-    ctx.scale(.25, .25);
-    ctx.fillStyle = "white";
-    ctx.fill(SPACE_STATION);
+    this.collide = true;
+    this.docking = false;
+    this.textColor = "white";
+    this.dockingText = "Docking...";
+    this.initVictory = true;
+    this.onVictory = onVictory;
   }
 
-  update() {}
+  draw(ctx) {
+    let stationOffset = OFFSET + MARGIN;
+
+    // Draw Docking Location
+    ctx.fillStyle = "rgba(0, 0, 200, 0.5)";
+    ctx.strokeStyle = "rgba(0, 0, 139, 0.5)";
+
+    // TODO: DRY rects
+    ctx
+      .roundRect(
+        this.x + this.sw / 2 - this.ship.w / 2 - MARGIN / 2,
+        this.y + this.sh + stationOffset - MARGIN / 2,
+        this.ship.w + MARGIN,
+        this.ship.h + MARGIN,
+        10
+      )
+      .fill();
+    ctx
+      .roundRect(
+        this.x + this.sw / 2 - this.ship.w / 2 - MARGIN / 2,
+        this.y + this.sh + stationOffset - MARGIN / 2,
+        this.ship.w + MARGIN,
+        this.ship.h + MARGIN,
+        10
+      )
+      .stroke();
+
+    ctx
+      .roundRect(
+        this.x + this.sw / 2 - this.ship.w / 2,
+        this.y + this.sh + stationOffset,
+        this.ship.w,
+        this.ship.h,
+        10
+      )
+      .fill();
+    ctx
+      .roundRect(
+        this.x + this.sw / 2 - this.ship.w / 2,
+        this.y + this.sh + stationOffset,
+        this.ship.w,
+        this.ship.h,
+        10
+      )
+      .stroke();
+
+    let text = `Docking Area`;
+    ctx.fillStyle = this.textColor;
+    ctx.font = "15px Helvetica";
+    let halfTextWidth = ctx.measureText(text).width / 2;
+    ctx.fillText(
+      text,
+      this.x - halfTextWidth + this.sw / 2,
+      this.y + this.sh + stationOffset + this.ship.h / 2
+    );
+
+    // Draw space station graphic
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.scale(0.25, 0.25);
+    ctx.fillStyle = "white";
+    ctx.fill(SPACE_STATION);
+    ctx.restore();
+
+    // Draw docking countdown
+    if (this.docking) {
+      ctx.fillStyle = this.textColor;
+      ctx.font = "15px Helvetica";
+      let halfTextWidth = ctx.measureText(this.dockingText).width / 2;
+
+      let docX = this.x + this.sw / 2;
+      let docY = this.y + this.sh + stationOffset + this.ship.h + MARGIN;
+      ctx.fillText(
+        this.dockingText,
+        docX - halfTextWidth,
+        docY
+      );
+
+      const PIE_OFFSET = 40;
+      ctx.moveTo(docX, docY + PIE_OFFSET);
+      ctx.beginPath();
+      ctx.arc(
+        docX,
+        docY + PIE_OFFSET,
+        30,
+        -Math.PI/2,
+        ((this.dockingTime - this.dockingStart) / DOCKING_END) * (Math.PI*2) - Math.PI/2,
+        false
+      );
+      ctx.lineTo(docX, docY + PIE_OFFSET);
+      ctx.fill();
+      ctx.closePath();
+    }
+  }
+
+  update(collisions, counter, actors) {
+    this.w = this.sw + OFFSET + MARGIN * 1 + this.ship.w;
+    this.h = this.sh + OFFSET + MARGIN * 1 + this.ship.h;
+
+    if (isCollidingWith(Ship, collisions)) {
+      let stationOffset = OFFSET + MARGIN;
+      const targetRect = {
+        x: this.x + this.sw / 2 - this.ship.w / 2 - MARGIN / 2,
+        y: this.y + this.sh + stationOffset - MARGIN / 2,
+        w: this.ship.w + MARGIN,
+        h: this.ship.h + MARGIN,
+      };
+
+      let colliding = 0;
+
+      // How many corners are colliding with our box?
+      let sceneCoordsOfParts = this.ship.getSceneCoordsOfParts();
+      const total = sceneCoordsOfParts.length;
+
+      for (let part of sceneCoordsOfParts) {
+        if (collideRectPt(part.x, part.y, targetRect)) {
+          colliding++;
+        }
+      }
+
+      if (colliding === total) {
+        if (this.docking === true) {
+          if(this.dockingTime - this.dockingStart >= DOCKING_END) {
+            // Docking Complete! Victory!
+            if(this.initVictory) {
+              this.initVictory = false; // only do this once
+              this.textColor = "green";
+              this.ship.freeze = true;
+              this.dockingText = "Docking COMPLETE!";
+              this.onVictory(counter);
+
+            }
+          }
+          this.dockingTime = counter;
+        } else {
+          this.docking = true;
+          this.dockingStart = counter;
+        }
+      } else {
+        this.docking = false;
+      }
+    }
+  }
 }

@@ -11,6 +11,8 @@ export class Ship extends Actor {
     this.keyboard = keyboard;
     this.yAdj = 0;
     this.xAdj = 0;
+    this.collide = true;
+    this.freeze = false;
 
     // Add all components
     for (let compKey of Object.keys(grid.components)) {
@@ -53,8 +55,8 @@ export class Ship extends Actor {
     this.I = this._getMomentOfInertia(this.parts, this.COM);
     console.log(this.I);
 
-    this.x = x; //this.COM.x - this.w / 2;
-    this.y = y; //this.COM.y - this.h / 2;
+    this.x = x;
+    this.y = y;
     this.theta = 0;
 
     this.vx = 0;
@@ -106,30 +108,71 @@ export class Ship extends Actor {
   }
 
   _toSceneCoord(x, y) {
-    let xFromCOM = x - this.COM.x*1;
-    let yFromCOM = y - this.COM.y*1;
+    let xFromCOM = x - this.COM.x * 1;
+    let yFromCOM = y - this.COM.y * 1;
 
     let magnitude = pthag(xFromCOM, yFromCOM);
 
     // Why do I need to do this, idk but I do
-    if(yFromCOM > 0) {
+    if (yFromCOM > 0) {
       magnitude = -magnitude;
     }
 
-    let phi = -toDeg(Math.atan(xFromCOM/yFromCOM));
+    let phi = -toDeg(Math.atan(xFromCOM / yFromCOM));
 
     return {
-      x: this.x + this.COM.x + (magnitude) * Math.sin(toRad(this.theta + phi)),
-      y: this.y + this.COM.y - (magnitude) * Math.cos(toRad(this.theta + phi)),
+      x: this.x + this.COM.x + magnitude * Math.sin(toRad(this.theta + phi)),
+      y: this.y + this.COM.y - magnitude * Math.cos(toRad(this.theta + phi)),
     };
+  }
+
+  getSceneCoordsOfParts() {
+    let partMap = {};
+    for (let part of this.parts) {
+      for (let corner = 0; corner < 4; corner++) {
+        let xAdj = 0;
+        let yAdj = 0;
+        if (corner === 0) {
+          // No adjustments, this is the upper left corner
+        } else if (corner === 1) {
+          xAdj = DIM;
+        } else if (corner === 2) {
+          xAdj = DIM;
+          yAdj = DIM;
+        } else if (corner === 3) {
+          yAdj = DIM;
+        }
+        //mapped.x += xAdj;
+        //mapped.y += yAdj;
+        let mapped = this._toSceneCoord(part.x + xAdj, part.y + yAdj);
+
+
+        partMap[mapped.x + "|" + mapped.y] = mapped;
+        
+      }
+    }
+
+    // Convert map to array
+    let parts = [];
+    for(let key in partMap) {
+      parts.push(partMap[key]);
+    }
+
+    return parts;
   }
 
   draw(ctx) {
     ctx.save();
+    // Bounding Box
+    /*
     ctx.fillStyle = "white";
     ctx.strokeStyle = "red";
-    ctx.roundRect(this.x + this.xAdj, this.y + this.yAdj, this.w, this.h, 10).fill();
-    ctx.roundRect(this.x + this.xAdj, this.y + this.yAdj, this.w, this.h, 10).stroke();
+    ctx
+      .roundRect(this.x + this.xAdj, this.y + this.yAdj, this.w, this.h, 10)
+      .fill();
+    ctx
+      .roundRect(this.x + this.xAdj, this.y + this.yAdj, this.w, this.h, 10)
+      .stroke();
 
     ctx.beginPath();
     ctx.arc(this.x, this.y, 2, 0, 2 * Math.PI);
@@ -138,6 +181,7 @@ export class Ship extends Actor {
 
     ctx.fillStyle = "purple";
     ctx.strokeStyle = "green";
+    */
 
     // Make the COM of the ship the origin
     ctx.translate(this.x + this.COM.x, this.y + this.COM.y);
@@ -158,55 +202,30 @@ export class Ship extends Actor {
 
     ctx.restore();
 
-    // DEBUG: draw points at min/max
-    let minX = 999999;
-    let minY = 999999;
-    let maxX = -999999;
-    let maxY = -999999;
-    for(let part of this.parts) {
-      let mapped = this._toSceneCoord(part.x, part.y);
-      if(mapped.x > maxX) {
-        maxX = mapped.x;
-      }
-      
-      if(mapped.x < minX) {
-        minX = mapped.x;
-      }
-
-      if(mapped.y > maxY) {
-        maxY = mapped.y;
-      }
-      
-      if(mapped.y < minY) {
-        minY = mapped.y;
-      }
+    
+    // DEBUG: draw part corner points
+    /*
+    for(let part of this.getSceneCoordsOfParts()) {
 
       ctx.fillStyle = "purple";
       ctx.strokeStyle = "green";
   
       ctx.beginPath();
-      ctx.arc(mapped.x, mapped.y, 10, 0, 2 * Math.PI);
+      ctx.arc(part.x, part.y, 10, 0, 2 * Math.PI);
       ctx.stroke();
       ctx.fill();
     }
-
-    /*
-    ctx.beginPath();
-    ctx.arc(minX, minY, 20, 0, 2 * Math.PI);
-    ctx.stroke();
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(maxX, maxY, 20, 0, 2 * Math.PI);
-    ctx.stroke();
-    ctx.fill();
     */
-
   }
 
   update(collisions, globalCounter) {
     for (let part of this.parts) {
       part.update(collisions, globalCounter);
+    }
+
+    // Don't update anything if the ship is frozen
+    if(this.freeze) {
+      return;
     }
 
     // Now determine how much each component affects the ship's translational and angular velocity
@@ -226,8 +245,6 @@ export class Ship extends Actor {
       this.vTheta += toDeg(changeX + changeY) / this.I;
       this.vx += xVelDelta;
       this.vy += yVelDelta;
-
-      // Determine new w/h
     }
 
     // Now apply velocity to the ship
@@ -240,45 +257,41 @@ export class Ship extends Actor {
     let minY = 999999;
     let maxX = -999999;
     let maxY = -999999;
-    for(let part of this.parts) {
+    for (let part of this.parts) {
       // Four corners per square (we'll have duplicate points, but it make the code easier)
-      for(let corner = 0; corner < 4; corner++) {
+      for (let corner = 0; corner < 4; corner++) {
         let xAdj = 0;
         let yAdj = 0;
-        if(corner === 0) {
+        if (corner === 0) {
           // No adjustments, this is the upper left corner
-        } else if(corner === 1) {
+        } else if (corner === 1) {
           xAdj = DIM;
-        } else if(corner === 2) {
+        } else if (corner === 2) {
           xAdj = DIM;
           yAdj = DIM;
-        } else if(corner === 3) {
+        } else if (corner === 3) {
           yAdj = DIM;
         }
 
-        //console.log(part);
         let mapped = this._toSceneCoord(part.x + xAdj, part.y + yAdj);
-        if(mapped.x > maxX) {
+        if (mapped.x > maxX) {
           maxX = mapped.x;
         }
-        
-        if(mapped.x < minX) {
+
+        if (mapped.x < minX) {
           minX = mapped.x;
         }
 
-        if(mapped.y > maxY) {
+        if (mapped.y > maxY) {
           maxY = mapped.y;
         }
-        
-        if(mapped.y < minY) {
+
+        if (mapped.y < minY) {
           minY = mapped.y;
         }
       }
     }
-    //console.log("X", minX, maxX);
 
-
-    //console.log(minX, maxX, minY, maxY);
     this.w = maxX - minX;
     this.h = maxY - minY;
 

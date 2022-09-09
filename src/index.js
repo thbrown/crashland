@@ -17,6 +17,8 @@ import { SpaceStation } from "./actors/SpaceStation.js";
 import { HUD } from "./actors/HUD.js";
 import { Speedometer } from "./actors/Speedometer.js";
 import { StationTracker } from "./actors/StationTracker.js";
+import { Confetti } from "./actors/Confetti.js";
+import { SlideScreen } from "./actors/SlideScreen.js";
 
 import { WIDTH, HEIGHT, FIRE_COLORS } from "./Constants.js";
 import {
@@ -293,8 +295,8 @@ function initBuild() {
       3, //randomIntFromInterval(1, getCount() - 1),
       keyboard
     ),
-    5+0,
-    5+1
+    5 + 0,
+    5 + 1
   );
   grid.addComponent(
     newComponent(
@@ -307,8 +309,8 @@ function initBuild() {
       3, //randomIntFromInterval(1, getCount() - 1),
       keyboard
     ),
-    5-1,
-    5+0
+    5 - 1,
+    5 + 0
   );
   grid.addComponent(
     newComponent(
@@ -321,8 +323,8 @@ function initBuild() {
       3, //randomIntFromInterval(1, getCount() - 1),
       keyboard
     ),
-    5+0,
-    5-1
+    5 + 0,
+    5 - 1
   );
   grid.addComponent(
     newComponent(
@@ -335,8 +337,8 @@ function initBuild() {
       3, //randomIntFromInterval(1, getCount() - 1),
       keyboard
     ),
-    5+1,
-    5+0
+    5 + 1,
+    5 + 0
   );
   all.push(grid);
   for (let i = 0; i < 5; i++) {
@@ -384,18 +386,29 @@ function initFly(grid) {
   hud.clear();
   let all = [];
   let ship = new Ship(WIDTH / 2, (HEIGHT * 2) / 3, grid, keyboard);
-  let station = new SpaceStation(600, 400, ship);
+  let station = new SpaceStation(650, 100, ship, function (counter) {
+    //hud.add(new SlideScreen(counter));
+    hud.add(new Confetti());
+    hud.add(new Future(globalCounter, 100, keyboard, () => {
+      console.log("ACTIVATED");
+      hud.add(new SlideScreen(counter));
+    }));
+  });
 
-  all.push(new PlanetGround());
+  //hud.add(new SlideScreen(0));
+  //hud.add(new Confetti());
+
   all.push(new PlanetAtmosphere(ship));
+  all.push(new PlanetGround());
   all.push(station);
 
   hud.add(new Speedometer(20, HEIGHT - 20, ship));
   hud.add(new StationTracker(ship, station, mouse));
 
   all.push(ship);
-  all.push(mouse);
-  //hud.add(mouse);
+  mouse.coll = station;
+  //all.push(mouse);
+  hud.add(mouse);
   centeredActor = ship;
   return all;
 }

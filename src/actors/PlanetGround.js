@@ -5,7 +5,7 @@ export class PlanetGround extends Actor {
   constructor() {
     super();
     this.x = Number.MIN_SAFE_INTEGER/2;
-    this.y = WIDTH/2;
+    this.y = WIDTH/2-1; // -1 ensures overlap with atmosphere
     this.w = Number.MAX_SAFE_INTEGER;
     this.h = Number.MAX_SAFE_INTEGER;
   };
