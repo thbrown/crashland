@@ -15,7 +15,8 @@ export class Button extends Actor {
     font,
     yOffset,
     mouse,
-    onClick
+    onClick,
+    centered
   ) {
     super();
     this.x = x;
@@ -32,6 +33,7 @@ export class Button extends Actor {
     this.mouse = mouse;
     this.font = font;
     this.yOffset = yOffset;
+    this.centered = centered;
   }
 
   draw(ctx) {
@@ -40,12 +42,19 @@ export class Button extends Actor {
     ctx.fillStyle = this.buttonColor;
     ctx.strokeStyle = this.textColor;
 
-    ctx.roundRect(this.x, this.y, this.w, this.h, 10).fill();
-    ctx.roundRect(this.x, this.y, this.w, this.h, 10).stroke();
+    ctx.font = this.font;
+
+    let xOffset = 0;
+    if(this.centered) {
+      xOffset = ctx.measureText(this.text).width / 2 + 20;
+    }
+
+    ctx.roundRect(this.x - xOffset, this.y, this.w + 5, this.h, 10).fill();
+    ctx.roundRect(this.x - xOffset, this.y, this.w + 5, this.h, 10).stroke();
 
     ctx.fillStyle = this.textColor;
-    ctx.font = this.font;
-    ctx.fillText(this.text, this.x + 20, this.y + this.yOffset);
+
+    ctx.fillText(this.text, this.x + 20 - xOffset, this.y + this.yOffset);
     ctx.restore();
   }
 

@@ -44,15 +44,15 @@ h-34.133v-8.533c0-9.387,7.68-17.067,17.067-17.067S272.067,134.68,272.067,144.067
 c-18.773,0-34.133-15.36-34.133-34.133S236.227,16.067,255,16.067c18.773,0,34.133,15.36,34.133,34.133
 S273.773,84.333,255,84.333z M357.4,58.733h34.133V75.8H357.4V58.733z M459.8,75.8V58.733h34.133V75.8H459.8z`);
 
-const MARGIN = 40;
-const OFFSET = -10;
-const DOCKING_END = 100;
+const OFFSET = 20;
 
 export class SpaceStation extends Actor {
-  constructor(x, y, ship, onVictory) {
+  constructor(level, ship, onVictory) {
     super();
-    this.x = x;
-    this.y = y;
+    this.x = level.sx;
+    this.y = level.sy;
+    this.sm = level.sm;
+    this.dockTime = level.st;
     this.sh = 126;
     this.sw = 126;
     this.w = this.sh;
@@ -67,7 +67,7 @@ export class SpaceStation extends Actor {
   }
 
   draw(ctx) {
-    let stationOffset = OFFSET + MARGIN;
+    let stationOffset = OFFSET;
 
     // Draw Docking Location
     ctx.fillStyle = "rgba(0, 0, 200, 0.5)";
@@ -76,19 +76,19 @@ export class SpaceStation extends Actor {
     // TODO: DRY rects
     ctx
       .roundRect(
-        this.x + this.sw / 2 - this.ship.w / 2 - MARGIN / 2,
-        this.y + this.sh + stationOffset - MARGIN / 2,
-        this.ship.w + MARGIN,
-        this.ship.h + MARGIN,
+        this.x + this.sw / 2 - this.ship.w / 2 - this.sm / 2,
+        this.y + this.sh + stationOffset - this.sm / 2,
+        this.ship.w + this.sm,
+        this.ship.h + this.sm,
         10
       )
       .fill();
     ctx
       .roundRect(
-        this.x + this.sw / 2 - this.ship.w / 2 - MARGIN / 2,
-        this.y + this.sh + stationOffset - MARGIN / 2,
-        this.ship.w + MARGIN,
-        this.ship.h + MARGIN,
+        this.x + this.sw / 2 - this.ship.w / 2 - this.sm / 2,
+        this.y + this.sh + stationOffset - this.sm / 2,
+        this.ship.w + this.sm,
+        this.ship.h + this.sm,
         10
       )
       .stroke();
@@ -137,7 +137,7 @@ export class SpaceStation extends Actor {
       let halfTextWidth = ctx.measureText(this.dockingText).width / 2;
 
       let docX = this.x + this.sw / 2;
-      let docY = this.y + this.sh + stationOffset + this.ship.h + MARGIN;
+      let docY = this.y + this.sh + stationOffset + this.ship.h + this.sm/2 + OFFSET;
       ctx.fillText(
         this.dockingText,
         docX - halfTextWidth,
@@ -152,7 +152,7 @@ export class SpaceStation extends Actor {
         docY + PIE_OFFSET,
         30,
         -Math.PI/2,
-        ((this.dockingTime - this.dockingStart) / DOCKING_END) * (Math.PI*2) - Math.PI/2,
+        ((this.dockingTime - this.dockingStart) / this.dockTime) * (Math.PI*2) - Math.PI/2,
         false
       );
       ctx.lineTo(docX, docY + PIE_OFFSET);
@@ -162,16 +162,16 @@ export class SpaceStation extends Actor {
   }
 
   update(collisions, counter, actors) {
-    this.w = this.sw + OFFSET + MARGIN * 1 + this.ship.w;
-    this.h = this.sh + OFFSET + MARGIN * 1 + this.ship.h;
+    this.w = this.sw + OFFSET + this.sm * 1 + this.ship.w;
+    this.h = this.sh + OFFSET + this.sm * 1 + this.ship.h;
 
     if (isCollidingWith(Ship, collisions)) {
-      let stationOffset = OFFSET + MARGIN;
+      let stationOffset = OFFSET;
       const targetRect = {
-        x: this.x + this.sw / 2 - this.ship.w / 2 - MARGIN / 2,
-        y: this.y + this.sh + stationOffset - MARGIN / 2,
-        w: this.ship.w + MARGIN,
-        h: this.ship.h + MARGIN,
+        x: this.x + this.sw / 2 - this.ship.w / 2 - this.sm / 2,
+        y: this.y + this.sh + stationOffset - this.sm / 2,
+        w: this.ship.w + this.sm,
+        h: this.ship.h + this.sm,
       };
 
       let colliding = 0;
@@ -188,15 +188,14 @@ export class SpaceStation extends Actor {
 
       if (colliding === total) {
         if (this.docking === true) {
-          if(this.dockingTime - this.dockingStart >= DOCKING_END) {
+          if(this.dockingTime - this.dockingStart >= this.dockTime) {
             // Docking Complete! Victory!
             if(this.initVictory) {
               this.initVictory = false; // only do this once
-              this.textColor = "green";
+              this.textColor = "blue";
               this.ship.freeze = true;
               this.dockingText = "Docking COMPLETE!";
               this.onVictory(counter);
-
             }
           }
           this.dockingTime = counter;

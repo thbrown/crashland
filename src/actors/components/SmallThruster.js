@@ -49,7 +49,7 @@ export class SmallThruster extends Component {
 
   getThrust() {
     if (this.keyboard.has(this.key)) {
-      return 1;
+      return 5;
     }
     return 0;
   }

@@ -1,9 +1,11 @@
 import { Actor } from "./Actor";
+import { collide } from "../Utils";
 
 export class HUD extends Actor {
   constructor() {
     super();
     this.elements = [];
+    this.startTime = new Date();
   }
 
   clear() {
@@ -22,10 +24,25 @@ export class HUD extends Actor {
     }
   }
 
+  resetTimer() {
+    this.startTime = new Date();
+  }
+
   update(collisions, globalCounter) {
     let toRemove = [];
     for (let element of this.elements) {
-      if (element.update(collisions, globalCounter)) {
+      // Get everything colliding with this element
+      let collisions = [];
+      for (let otherElement of this.elements) {
+        if (element === otherElement) {
+          continue;
+        }
+        if (collide(element, otherElement)) {
+          collisions.push(otherElement);
+        }
+      }
+
+      if (element.update(collisions, globalCounter, this.elements)) {
         toRemove.push(element);
       }
     }

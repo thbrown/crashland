@@ -21,13 +21,53 @@ import { Confetti } from "./actors/Confetti.js";
 import { SlideScreen } from "./actors/SlideScreen.js";
 
 import { WIDTH, HEIGHT, FIRE_COLORS } from "./Constants.js";
-import {
-  randomIntFromInterval,
-  collide,
-  randomLetter,
-  toRad,
-  createTransform,
-} from "./Utils.js";
+import { randomIntFromInterval, collide, randomLetter } from "./Utils.js";
+import { Chronometer } from "./actors/Chronometer.js";
+import { PlanetInfo } from "./actors/PlanetInfo.js";
+
+const levels = [
+  {
+    n: 0,
+    pn: "Recta",
+    parts: [
+      { id: 1, a: "a" },
+      { id: 4 },
+    ],
+    cparts: [
+      { id: 2, a: "s" },
+    ],
+    sx: 600,
+    sy: -1500,
+    sm: 100,
+    st: 100,
+    atmh: -2000
+  },
+  {
+    n: 1,
+    pn: "Vi",
+    parts: [
+      { id: 2, a: "h" },
+      { id: 2, a: "j" },
+      { id: 2, a: "k" },
+      { id: 2, a: "l" },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+    ],
+    cparts: [
+      { id: 2, a: "ArrowLeft" },
+      { id: 2, a: "ArrowRight" },
+      { id: 2, a: "ArrowUp" },
+      { id: 2, a: "ArrowDown" },
+    ],
+    sx: 500,
+    sy: 400,
+    sm: 300,
+    st: 300,
+    atmh: -2000
+  },
+];
 
 const canvasElem = document.querySelector("canvas");
 const ctx = canvasElem.getContext("2d");
@@ -40,7 +80,7 @@ const hud = new HUD();
 let centeredActor = undefined;
 
 //let actors = initMainMenu();
-let actors = initBuild();
+let actors = initBuild(levels[0]);
 
 let globalCounter = 0;
 function clock() {
@@ -61,7 +101,7 @@ function clock() {
 
     ctx.translate(WIDTH / 2, HEIGHT / 2); // We want the ship at the center of the screen, not at the top left corner
     ctx.scale(scale, scale);
-    //ctx.rotate(-toRad(centeredActor.theta)); // Comment this out if we don't want fixed rotation
+    //ctx.rotate(-toRad(centeredActor.theta)); // Comment this out if we don't want fixed rotation (broken)
     ctx.translate(-xTrans, -yTrans);
   }
 
@@ -245,7 +285,7 @@ function initMainMenu() {
                                 undefined,
                                 keyboard,
                                 () => {
-                                  actors = initBuild();
+                                  actors = initBuild(levels[0]);
                                 }
                               )
                             );
@@ -266,10 +306,11 @@ function initMainMenu() {
   return all;
 }
 
-function initBuild() {
+function initBuild(level) {
+  console.log("Init Build", level.n);
+  let all = [];
   hud.clear();
   centeredActor = undefined;
-  let all = [];
   background.fadeStart = undefined;
   background.color = "black";
   all.push(background);
@@ -281,9 +322,42 @@ function initBuild() {
       "30px Helvetica"
     )
   );
-  all.push(new Rectangle(50, 70, 550, 550, "white"));
   all.push(new Rectangle(650, 70, 550, 550, "white"));
+
   let grid = new Grid(650, 70, mouse);
+
+  // Coil Stuff
+  if (true) {
+    let hl = String.fromCharCode(parseInt("2015", 16));
+    all.push(
+      new Text(
+        60,
+        460,
+        `${hl.repeat(12)} Bonus Coil Components ${hl.repeat(12)}`,
+        "15px Helvetica",
+        false,
+        "red"
+      )
+    );
+    for (let i = 0; i < level.cparts.length; i++) {
+      all.push(
+        newComponent(
+          60 + (i % 5) * 102,
+          490 + (i % 5) * 2 + (i / 5) * 100,
+          0,
+          mouse,
+          grid,
+          level.cparts[i].a,
+          level.cparts[i].id,
+          keyboard
+        )
+      );
+    }
+    all.push(new Rectangle(50, 70, 550, 570, "white"));
+  } else {
+    all.push(new Rectangle(50, 70, 550, 550, "white"));
+  }
+  /*
   grid.addComponent(
     newComponent(
       1,
@@ -340,17 +414,18 @@ function initBuild() {
     5 + 1,
     5 + 0
   );
+  */
   all.push(grid);
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < level.parts.length; i++) {
     all.push(
       newComponent(
-        80 + i * 95,
-        100 + i * 25,
+        60 + (i % 5) * 102,
+        100 + (i % 5) * 2 + (i / 5) * 100,
         0,
         mouse,
         grid,
-        randomLetter(),
-        3, //randomIntFromInterval(1, getCount() - 1),
+        level.parts[i].a,
+        level.parts[i].id,
         keyboard
       )
     );
@@ -373,7 +448,7 @@ function initBuild() {
       38,
       mouse,
       () => {
-        actors = initFly(grid);
+        actors = initFly(grid, level);
       }
     )
   );
@@ -382,28 +457,111 @@ function initBuild() {
   return all;
 }
 
-function initFly(grid) {
+function initFly(grid, level) {
+  console.log("INIT FLY", level.n);
   hud.clear();
+  hud.resetTimer();
+  let chron = new Chronometer(WIDTH - 300, HEIGHT - 20, hud);
+  hud.add(chron);
+
   let all = [];
   let ship = new Ship(WIDTH / 2, (HEIGHT * 2) / 3, grid, keyboard);
-  let station = new SpaceStation(650, 100, ship, function (counter) {
-    //hud.add(new SlideScreen(counter));
+  let station = new SpaceStation(level, ship, function (counter) {
+    let finishTime = new Date();
+    let elapsedTimeMs = Math.abs(finishTime - hud.startTime) / 1000;
+    chron.lockedTime = elapsedTimeMs;
     hud.add(new Confetti());
-    hud.add(new Future(globalCounter, 100, keyboard, () => {
-      console.log("ACTIVATED");
-      hud.add(new SlideScreen(counter));
-    }));
+    hud.add(
+      new Future(globalCounter, 100, null, () => {
+        hud.add(new SlideScreen(counter));
+      })
+    );
+
+    hud.add(
+      new Future(globalCounter, 130, null, () => {
+        hud.add(
+          new Text(
+            WIDTH / 2,
+            HEIGHT * 0.25,
+            "You Survived!",
+            "40px Helvetica",
+            true
+          )
+        );
+      })
+    );
+    hud.add(
+      new Future(globalCounter, 135, null, () => {
+        hud.add(
+          new Text(
+            WIDTH / 2,
+            HEIGHT * 0.35,
+            `Elapsed Time: ${elapsedTimeMs.toFixed(3)} seconds`,
+            "20px Helvetica",
+            true
+          )
+        );
+      })
+    );
+    hud.add(
+      new Future(globalCounter, 140, null, () => {
+        hud.add(
+          new Text(
+            WIDTH / 2,
+            HEIGHT * 0.45,
+            `Cargo Saved: ${ship.getCargoCount()} (-5 per container)`,
+            "20px Helvetica",
+            true
+          )
+        );
+      })
+    );
+    hud.add(
+      new Future(globalCounter, 145, null, () => {
+        hud.add(
+          new Text(
+            WIDTH / 2,
+            HEIGHT * 0.55,
+            `Total Score: ${(elapsedTimeMs - 5 * ship.getCargoCount()).toFixed(
+              3
+            )}`,
+            "25px Helvetica",
+            true
+          )
+        );
+      })
+    );
+    hud.add(
+      new Future(globalCounter, 150, null, () => {
+        hud.add(
+          new Button(
+            WIDTH / 2,
+            HEIGHT * 0.65,
+            200,
+            50,
+            "Next Level",
+            "black",
+            "white",
+            "35px Helvetica",
+            38,
+            mouse,
+            () => {
+              actors = initBuild(levels[level.n+1]);
+            },
+            true
+          )
+        );
+      })
+    );
   });
 
-  //hud.add(new SlideScreen(0));
-  //hud.add(new Confetti());
-
-  all.push(new PlanetAtmosphere(ship));
-  all.push(new PlanetGround());
-  all.push(station);
-
+  hud.add(new PlanetInfo(50, 70, level));
   hud.add(new Speedometer(20, HEIGHT - 20, ship));
   hud.add(new StationTracker(ship, station, mouse));
+
+  all.push(new PlanetAtmosphere(ship, level.atmh));
+  all.push(new PlanetGround());
+  all.push(station);
 
   all.push(ship);
   mouse.coll = station;

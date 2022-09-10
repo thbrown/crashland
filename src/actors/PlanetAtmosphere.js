@@ -5,7 +5,7 @@ import { WIDTH } from "../Constants";
 const SPACE_LINE = -3000;
 
 export class PlanetAtmosphere extends Actor {
-  constructor(ship) {
+  constructor(ship, line) {
     super();
     this.ship = ship;
 
@@ -16,6 +16,7 @@ export class PlanetAtmosphere extends Actor {
     this.y = -WIDTH/2;
     this.w = Number.MAX_SAFE_INTEGER;
     this.h = BIG_NUMBER;
+    this.line = line;
   };
 
   draw(ctx) {
@@ -27,11 +28,11 @@ export class PlanetAtmosphere extends Actor {
     ctx.fillRect(this.x, this.y, this.w, this.h);
 
     // Draw the atmosphere gradient
-    var grd = ctx.createLinearGradient(this.x, this.y, this.x, this.y-SPACE_LINE);
+    var grd = ctx.createLinearGradient(this.x, this.y, this.x, this.y-this.line);
     grd.addColorStop(0, "rgb(135,206,235)");
     grd.addColorStop(1, "rgb(0,0,0)");
     ctx.fillStyle = grd;
-    ctx.fillRect(this.x, this.y, this.w, -SPACE_LINE);
+    ctx.fillRect(this.x, this.y, this.w, -this.line);
   }
 
   update() {}

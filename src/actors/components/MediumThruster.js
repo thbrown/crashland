@@ -50,7 +50,7 @@ export class MediumThruster extends Component {
 
   getThrust() {
     if (this.keyboard.has(this.key)) {
-      return 5;
+      return 10;
     }
     return 0;
   }

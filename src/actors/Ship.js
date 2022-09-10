@@ -1,6 +1,7 @@
 import { Actor } from "./Actor";
 import { DIM } from "../Constants";
 import { toDeg, toRad, pthag } from "../Utils";
+import { CargoContainer } from "./components/CargoContainer";
 
 const mass = 100; // mass of one tile/square/part/component
 
@@ -53,7 +54,6 @@ export class Ship extends Actor {
     // Calc center of mass
     this.COM = this._getCenterOfMass(this.parts);
     this.I = this._getMomentOfInertia(this.parts, this.COM);
-    console.log(this.I);
 
     this.x = x;
     this.y = y;
@@ -159,6 +159,16 @@ export class Ship extends Actor {
     }
 
     return parts;
+  }
+
+  getCargoCount() {
+    let counter = 0;
+    for (let part of this.parts) {
+      if(part instanceof CargoContainer) {
+        counter ++;
+      }
+    }
+    return counter;
   }
 
   draw(ctx) {

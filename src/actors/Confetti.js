@@ -17,6 +17,7 @@ const colors = [
   { front : 'turquoise', back: 'darkturquoise'},
 ];
 
+// Adapted from CodePen (Canvas Confetti - Nicholas Suski)
 // https://codepen.io/n33kos/pen/gjVQwv
 export class Confetti extends Actor {
   constructor() {

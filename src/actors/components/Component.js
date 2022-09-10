@@ -15,7 +15,7 @@ export class Component extends Actor {
     this.collide = true;
     this.mouse = mouse;
     this.grid = grid;
-    this.rot = new Rotate(50, 0, this);
+    this.rot = new Rotate(45, 0, this);
     this.onRelease = function () {
       let targetLocation = this.grid.getClosestValidLocation(this.x, this.y);
       if (targetLocation === undefined) {
@@ -81,10 +81,23 @@ export class Component extends Actor {
     if (this.key) {
       ctx.fillStyle = "black";
       ctx.fillRect(this.x + 18, this.y + 15, 15, 17);
-      ctx.roundRect(this.x + 18, this.y + 15, 15, 17).fill();
+      //ctx.roundRect(this.x + 18, this.y + 15, 15, 0).fill();
       ctx.fillStyle = "white";
       ctx.font = "15px Helvetica";
-      ctx.fillText(this.key, this.x + this.w / 2.5, this.y + this.h / 1.7);
+      let textToDraw = this.key;
+      if(this.key === "Shift") {
+        textToDraw = String.fromCharCode(parseInt("21E7", 16));
+      } else if(this.key === "ArrowLeft") {
+        textToDraw = String.fromCharCode(parseInt("2190", 16));
+      } else if(this.key === "ArrowRight") {
+        textToDraw = String.fromCharCode(parseInt("2192", 16));
+      } else if(this.key === "ArrowUp") {
+        textToDraw = String.fromCharCode(parseInt("2191", 16));
+      } else if(this.key === "ArrowDown") {
+        textToDraw = String.fromCharCode(parseInt("2193", 16));
+      }
+      let halfTextWidth = ctx.measureText(textToDraw).width / 2;
+      ctx.fillText(textToDraw, this.x + this.w / 2 - halfTextWidth, this.y + this.h / 1.7);
     }
 
     ctx.restore();
