@@ -1,3 +1,6 @@
+import { Ship } from "./actors/Ship";
+import { Button } from "./actors/Button";
+
 export function getColor(percentage, colors) {
   if (percentage <= 0) {
     return colors[0];
@@ -55,11 +58,18 @@ export function collide(actorA, actorB) {
   if (!actorA.collide || !actorB.collide) {
     return false;
   }
+  let Ax = actorA.x + (actorA.xAdj ? actorA.xAdj : 0);
+  let Ay = actorA.y + (actorA.yAdj ? actorA.yAdj : 0);
+
+  let Bx = actorB.x + (actorB.xAdj ? actorB.xAdj : 0);
+  let By = actorB.y + (actorB.yAdj ? actorB.yAdj : 0);
+
+
   if (
-    actorA.x < actorB.x + actorB.w &&
-    actorA.x + actorA.w > actorB.x &&
-    actorA.y < actorB.y + actorB.h &&
-    actorA.h + actorA.y > actorB.y
+    Ax < Bx + actorB.w &&
+    Ax + actorA.w > Bx &&
+    Ay < By + actorB.h &&
+    actorA.h + Ay > By
   ) {
     return true;
   } else {
@@ -128,4 +138,8 @@ export function collideRectPt(x,y, actor) {
 
 export function randomRange(min, max) {
   return Math.random() * (max - min) + min;
+}
+
+export function unicode(hex) {
+  return String.fromCharCode(parseInt(hex, 16));
 }

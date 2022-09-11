@@ -2,9 +2,9 @@ import { Actor } from "./Actor";
 import { getColor, randomIntFromInterval } from "../Utils.js";
 
 export class Particle extends Actor {
-  constructor(x, y, angle, length, size, color, spread) {
+  constructor(x, y, angle, length, size, color, spread, velocity) {
     super();
-    this.speed = 15;
+    this.speed = velocity ? velocity : 15;
     this.x = x;
     this.y = y;
     this.angle = angle;

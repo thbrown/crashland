@@ -5,10 +5,8 @@ import { WIDTH } from "../Constants";
 const SPACE_LINE = -3000;
 
 export class PlanetAtmosphere extends Actor {
-  constructor(ship, line) {
+  constructor(line) {
     super();
-    this.ship = ship;
-
     // Number.MAX_SAFE_INTEGER is too big apparently, nothing appears to be drawn when using it
     const BIG_NUMBER = 999999;
 

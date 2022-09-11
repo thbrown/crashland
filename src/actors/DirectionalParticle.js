@@ -2,7 +2,7 @@ import { Actor } from "./Actor";
 import { Particle } from "./Particle";
 
 export class DirectionalParticle extends Actor {
-  constructor(x, y, angle, count, frequency, length, size, color, spread) {
+  constructor(x, y, angle, count, frequency, length, size, color, spread, velocity) {
     super();
     this.x = x;
     this.y = y;
@@ -15,6 +15,7 @@ export class DirectionalParticle extends Actor {
     this.frequency = frequency;
     this.speed = 0;
     this.spread = spread;
+    this.velocity = velocity;
   }
 
   draw(ctx) {
@@ -26,6 +27,7 @@ export class DirectionalParticle extends Actor {
   update() {
     let toRemove = [];
 
+    // Speed here is how fast the set of particles move, not how fast each one moves
     this.x += this.speed;
     this.y += this.speed;
 
@@ -51,7 +53,8 @@ export class DirectionalParticle extends Actor {
             this.length,
             this.size,
             this.color,
-            this.spread
+            this.spread,
+            this.velocity
           )
         );
       }

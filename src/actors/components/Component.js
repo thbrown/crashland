@@ -1,6 +1,7 @@
 import { Actor } from "../Actor";
 import { Rotate } from "../Rotate";
 import { Mouse } from "../Mouse";
+import { unicode } from "../../Utils.js";
 
 import { collide, isCollidingWith, toRad } from "../../Utils.js";
 
@@ -85,19 +86,23 @@ export class Component extends Actor {
       ctx.fillStyle = "white";
       ctx.font = "15px Helvetica";
       let textToDraw = this.key;
-      if(this.key === "Shift") {
-        textToDraw = String.fromCharCode(parseInt("21E7", 16));
-      } else if(this.key === "ArrowLeft") {
-        textToDraw = String.fromCharCode(parseInt("2190", 16));
-      } else if(this.key === "ArrowRight") {
-        textToDraw = String.fromCharCode(parseInt("2192", 16));
-      } else if(this.key === "ArrowUp") {
-        textToDraw = String.fromCharCode(parseInt("2191", 16));
-      } else if(this.key === "ArrowDown") {
-        textToDraw = String.fromCharCode(parseInt("2193", 16));
+      if (this.key === "Shift") {
+        textToDraw = unicode("21E7");
+      } else if (this.key === "ArrowLeft") {
+        textToDraw = unicode("2190");
+      } else if (this.key === "ArrowRight") {
+        textToDraw = unicode("2192");
+      } else if (this.key === "ArrowUp") {
+        textToDraw = unicode("2191");
+      } else if (this.key === "ArrowDown") {
+        textToDraw = unicode("2193");
       }
       let halfTextWidth = ctx.measureText(textToDraw).width / 2;
-      ctx.fillText(textToDraw, this.x + this.w / 2 - halfTextWidth, this.y + this.h / 1.7);
+      ctx.fillText(
+        textToDraw,
+        this.x + this.w / 2 - halfTextWidth,
+        this.y + this.h / 1.7
+      );
     }
 
     ctx.restore();
@@ -105,9 +110,6 @@ export class Component extends Actor {
 
   update(collisions, globalCounter) {
     if (isCollidingWith(Mouse, collisions)) {
-      //this.buttonColor = this.originalTextColor;
-      //this.textColor = this.originalButtonColor;
-      //mouseClicked = true;
       if (this.mouse.click && !this.mouse.dragged) {
         this.mouse.dragged = this;
 
@@ -120,7 +122,6 @@ export class Component extends Actor {
     }
     this.rot.update();
   }
-
 
   getThrust() {
     return 0;

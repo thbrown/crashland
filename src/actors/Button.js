@@ -16,7 +16,8 @@ export class Button extends Actor {
     yOffset,
     mouse,
     onClick,
-    centered
+    centered,
+    buffer
   ) {
     super();
     this.x = x;
@@ -34,6 +35,7 @@ export class Button extends Actor {
     this.font = font;
     this.yOffset = yOffset;
     this.centered = centered;
+    this.buffer = buffer === undefined ? 20 : buffer;
   }
 
   draw(ctx) {
@@ -46,7 +48,8 @@ export class Button extends Actor {
 
     let xOffset = 0;
     if(this.centered) {
-      xOffset = ctx.measureText(this.text).width / 2 + 20;
+      xOffset = ctx.measureText(this.text).width / 2;
+      this.xAdj = -xOffset;
     }
 
     ctx.roundRect(this.x - xOffset, this.y, this.w + 5, this.h, 10).fill();
@@ -54,7 +57,7 @@ export class Button extends Actor {
 
     ctx.fillStyle = this.textColor;
 
-    ctx.fillText(this.text, this.x + 20 - xOffset, this.y + this.yOffset);
+    ctx.fillText(this.text, this.x + this.buffer - xOffset, this.y + this.yOffset);
     ctx.restore();
   }
 
@@ -65,7 +68,7 @@ export class Button extends Actor {
       this.textColor = this.originalButtonColor;
       mouseClicked = true;
       if (this.mouse.click) {
-        // TODO: this happens if you click off the button and drag onto it
+        this.mouse.click = false;
         this.onClick();
         return true;
       }

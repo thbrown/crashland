@@ -1,12 +1,13 @@
 import { Actor } from "./Actor";
 import { DIM } from "../Constants";
-import { toDeg, toRad, pthag } from "../Utils";
+import { toDeg, toRad, pthag, isCollidingWith } from "../Utils";
 import { CargoContainer } from "./components/CargoContainer";
+import { PlanetGround } from "./PlanetGround";
 
 const mass = 100; // mass of one tile/square/part/component
 
 export class Ship extends Actor {
-  constructor(x, y, grid, keyboard) {
+  constructor(x, y, grid, keyboard, onCrash) {
     super();
     this.parts = [];
     this.keyboard = keyboard;
@@ -14,6 +15,7 @@ export class Ship extends Actor {
     this.xAdj = 0;
     this.collide = true;
     this.freeze = false;
+    this.onCrash = onCrash;
 
     // Add all components
     for (let compKey of Object.keys(grid.components)) {
@@ -142,13 +144,8 @@ export class Ship extends Actor {
         } else if (corner === 3) {
           yAdj = DIM;
         }
-        //mapped.x += xAdj;
-        //mapped.y += yAdj;
         let mapped = this._toSceneCoord(part.x + xAdj, part.y + yAdj);
-
-
         partMap[mapped.x + "|" + mapped.y] = mapped;
-        
       }
     }
 
@@ -211,7 +208,6 @@ export class Ship extends Actor {
     ctx.fill();
 
     ctx.restore();
-
     
     // DEBUG: draw part corner points
     /*
@@ -238,6 +234,12 @@ export class Ship extends Actor {
       return;
     }
 
+    // Crash
+    if(isCollidingWith(PlanetGround, collisions)) {
+      this.onCrash(this.x + this.COM.x, this.y + this.COM.y, this, globalCounter);
+      return true;
+    }
+
     // Now determine how much each component affects the ship's translational and angular velocity
     for (let part of this.parts) {
       let thrust = part.getThrust();
@@ -256,6 +258,14 @@ export class Ship extends Actor {
       this.vx += xVelDelta;
       this.vy += yVelDelta;
     }
+
+    // TODO: make these altitude dependent
+    // Adjust velocity for gravity
+    this.vy += .01;
+
+    // Adjust velocity for drag
+    this.vx = this.vx * .999;
+    this.vy = this.vy * .999;
 
     // Now apply velocity to the ship
     this.x += this.vx;

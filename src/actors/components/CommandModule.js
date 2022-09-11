@@ -22,6 +22,6 @@ export class CommandModule extends Component {
   }
 
   update(collisions, globalCounter) {
-    super.update(collisions, globalCounter);
+    // Can't drag command module
   }
 }

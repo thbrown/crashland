@@ -19,32 +19,70 @@ import { Speedometer } from "./actors/Speedometer.js";
 import { StationTracker } from "./actors/StationTracker.js";
 import { Confetti } from "./actors/Confetti.js";
 import { SlideScreen } from "./actors/SlideScreen.js";
+import { CommandModule } from "./actors/components/CommandModule.js";
 
-import { WIDTH, HEIGHT, FIRE_COLORS } from "./Constants.js";
-import { randomIntFromInterval, collide, randomLetter } from "./Utils.js";
+import { WIDTH, HEIGHT, FIRE_COLORS, PPM } from "./Constants.js";
+import {
+  randomIntFromInterval,
+  collide,
+  randomLetter,
+  unicode,
+} from "./Utils.js";
 import { Chronometer } from "./actors/Chronometer.js";
 import { PlanetInfo } from "./actors/PlanetInfo.js";
 
 const levels = [
   {
     n: 0,
-    pn: "Recta",
+    pn: "Test", // Planet name
+    pg: 1, // Planet gravity
+    pa: 1, // Planet atmosphere
+    pc: "brown", // Planet color
     parts: [
+      // Ship components
+      { id: 2, a: "ArrowLeft" },
+      { id: 2, a: "ArrowRight" },
+      { id: 2, a: "ArrowUp" },
+      { id: 2, a: "ArrowDown" },
+      { id: 4 },
+    ],
+    cparts: [
+      // Bonus Coil ship components
+      { id: 2, a: "s" },
+    ],
+    sx: 500, // Space station X coord
+    sy: 300, // Space station Y coord
+    sm: 300, // Space station docking margin
+    st: 100, // Space station docking time
+    atmh: -2000, // Atmosphere height in px
+  },
+  {
+    n: 1,
+    pn: "Recta", // Planet name
+    pc: "yellow",
+    pg: 1, // Planet gravity
+    pa: 1, // Planet atmosphere
+    parts: [
+      // Ship components
       { id: 1, a: "a" },
       { id: 4 },
     ],
     cparts: [
+      // Bonus Coil ship components
       { id: 2, a: "s" },
     ],
-    sx: 600,
-    sy: -1500,
-    sm: 100,
-    st: 100,
-    atmh: -2000
+    sx: 600, // Space station X coord
+    sy: -1500, // Space station Y coord
+    sm: 100, // Space station docking margin
+    st: 100, // Space station docking time
+    atmh: -2000, // Atmosphere height in px
   },
   {
-    n: 1,
+    n: 2,
     pn: "Vi",
+    pg: 1, // Planet Gravity
+    pa: 1, // Planet Atmosphere
+    pc: "red",
     parts: [
       { id: 2, a: "h" },
       { id: 2, a: "j" },
@@ -65,7 +103,32 @@ const levels = [
     sy: 400,
     sm: 300,
     st: 300,
-    atmh: -2000
+    atmh: -2000,
+  },
+  {
+    n: 4,
+    pn: "Coruscant", // Planet name
+    pg: 1, // Planet gravity
+    pa: 1, // Planet atmosphere
+    pc: "grey",
+    parts: [
+      // Ship components
+      { id: 2, a: "s" },
+      { id: 2, a: "S" },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+    ],
+    cparts: [
+      // Bonus Coil ship components
+      { id: 2, a: "s" },
+      { id: 2, a: "S" },
+    ],
+    sx: 500, // Space station X coord
+    sy: 300, // Space station Y coord
+    sm: 300, // Space station docking margin
+    st: 100, // Space station docking time
+    atmh: -2000, // Atmosphere height in px
   },
 ];
 
@@ -77,10 +140,11 @@ const background = new Background();
 const keyboard = new Keyboard();
 const hud = new HUD();
 
+let toAdd = [];
 let centeredActor = undefined;
 
-//let actors = initMainMenu();
-let actors = initBuild(levels[0]);
+let actors = initMainMenu();
+//let actors = initBuild(levels[0]);
 
 let globalCounter = 0;
 function clock() {
@@ -145,6 +209,12 @@ function clock() {
     return toRemove.indexOf(el) < 0;
   });
 
+  // Add any new actors
+  for (let addition of toAdd) {
+    actors.splice(addition.at ? addition.at : 0, 0, addition.value);
+  }
+  toAdd = [];
+
   window.requestAnimationFrame(clock);
 }
 
@@ -180,6 +250,139 @@ function initMainMenu() {
   all.push(particles);
   let ship = new MenuShip(-100, -100, 135);
   all.push(ship);
+
+  let initMovie = () => {
+    // Start background gradient
+    background.fadeStart = globalCounter;
+    // Move Ship
+    ship.speed = -10;
+    // Move Particles
+    particles.speed = 7;
+    // Queue Explosion
+    actors.push(
+      new Future(globalCounter, 120, keyboard, () => {
+        actors.push(
+          new DirectionalParticle(
+            WIDTH,
+            HEIGHT,
+            -65,
+            1,
+            1,
+            60,
+            500,
+            FIRE_COLORS,
+            50
+          )
+        );
+        // Queue Blackout
+        actors.push(
+          new Future(globalCounter, 100, keyboard, () => {
+            actors.push(
+              new DirectionalParticle(
+                WIDTH,
+                HEIGHT,
+                -65,
+                1,
+                1,
+                70,
+                500,
+                ["rgb(0,0,0)", "rgb(0,0,0)"],
+                50
+              )
+            );
+            // Queue Instructions
+            actors.push(
+              new Future(globalCounter, 90, keyboard, () => {
+                actors = actors.filter(function (el) {
+                  return el.constructor.name === "Future";
+                });
+                actors.push(new Rectangle(0, 0, WIDTH, HEIGHT, "black", true));
+                actors.push(
+                  new Text(
+                    20,
+                    270,
+                    "You've crashed on a hostile planet, but you've escaped death for now...",
+                    "39px Helvetica"
+                  )
+                );
+                // Queue Instructions 2
+                actors.push(
+                  new Future(globalCounter, 180, keyboard, () => {
+                    actors.push(
+                      new Text(
+                        20,
+                        310,
+                        "However, the same can't be said for your spaceship.",
+                        "39px Helvetica"
+                      )
+                    );
+                    // Queue Instructions 2
+                    actors.push(
+                      new Future(globalCounter, 180, keyboard, () => {
+                        actors.push(
+                          new Text(
+                            20,
+                            400,
+                            "Rebuild your ship and escape to the space station to survive.",
+                            "39px Helvetica"
+                          )
+                        );
+                        actors.push(
+                          new Text(
+                            20,
+                            490,
+                            "[Press any key to continue]",
+                            "39px Helvetica"
+                          )
+                        );
+                        // Queue Remove All & Show Build Screen
+                        actors.push(
+                          new Future(globalCounter, undefined, keyboard, () => {
+                            actors = initBuild(levels[0]);
+                          })
+                        );
+                      })
+                    );
+                  })
+                );
+              })
+            );
+          })
+        );
+      })
+    );
+  };
+
+  let maxLevel = localStorage.getItem("MAX_LEVEL");
+  if (maxLevel !== undefined) {
+    maxLevel = Math.min(localStorage.getItem("MAX_LEVEL"), levels.length - 1); // Don't show more levels than we have
+    for (let level = 0; level < maxLevel; level++) {
+      console.log(level, maxLevel);
+      all.push(
+        new Button(
+          965 - maxLevel * 100 + 100 * level,
+          600,
+          90,
+          100,
+          `${level + 1}`,
+          "black",
+          "white",
+          "70px Helvetica",
+          75,
+          mouse,
+          () => {
+            if (level === 0) {
+              initMovie();
+            } else {
+              actors = initBuild(levels[level]);
+            }
+          },
+          true,
+          28
+        )
+      );
+    }
+  }
   all.push(
     new Button(
       945,
@@ -193,112 +396,11 @@ function initMainMenu() {
       75,
       mouse,
       () => {
-        // Start background gradient
-        background.fadeStart = globalCounter;
-        // Move Ship
-        ship.speed = -10;
-        // Move Particles
-        particles.speed = 7;
-        // Queue Explosion
-        actors.push(
-          new Future(globalCounter, 120, keyboard, () => {
-            actors.push(
-              new DirectionalParticle(
-                WIDTH,
-                HEIGHT,
-                -65,
-                1,
-                1,
-                60,
-                500,
-                FIRE_COLORS,
-                50
-              )
-            );
-            // Queue Blackout
-            actors.push(
-              new Future(globalCounter, 100, keyboard, () => {
-                actors.push(
-                  new DirectionalParticle(
-                    WIDTH,
-                    HEIGHT,
-                    -65,
-                    1,
-                    1,
-                    70,
-                    500,
-                    ["rgb(0,0,0)", "rgb(0,0,0)"],
-                    50
-                  )
-                );
-                // Queue Instructions
-                actors.push(
-                  new Future(globalCounter, 90, keyboard, () => {
-                    actors = actors.filter(function (el) {
-                      return el.constructor.name === "Future";
-                    });
-                    actors.push(
-                      new Rectangle(0, 0, WIDTH, HEIGHT, "black", true)
-                    );
-                    actors.push(
-                      new Text(
-                        20,
-                        270,
-                        "You've crashed on a hostile planet, but you've escaped death for now...",
-                        "39px Helvetica"
-                      )
-                    );
-                    // Queue Instructions 2
-                    actors.push(
-                      new Future(globalCounter, 180, keyboard, () => {
-                        actors.push(
-                          new Text(
-                            20,
-                            310,
-                            "However, the same can't be said for your spaceship.",
-                            "39px Helvetica"
-                          )
-                        );
-                        // Queue Instructions 2
-                        actors.push(
-                          new Future(globalCounter, 180, keyboard, () => {
-                            actors.push(
-                              new Text(
-                                20,
-                                400,
-                                "Rebuild your ship and escape to the space station to survive.",
-                                "39px Helvetica"
-                              )
-                            );
-                            actors.push(
-                              new Text(
-                                20,
-                                490,
-                                "[Press any key to continue]",
-                                "39px Helvetica"
-                              )
-                            );
-                            // Queue Remove All & Show Build Screen
-                            actors.push(
-                              new Future(
-                                globalCounter,
-                                undefined,
-                                keyboard,
-                                () => {
-                                  actors = initBuild(levels[0]);
-                                }
-                              )
-                            );
-                          })
-                        );
-                      })
-                    );
-                  })
-                );
-              })
-            );
-          })
-        );
+        if (maxLevel === undefined || maxLevel === 0) {
+          initMovie();
+        } else {
+          actors = initBuild(levels[maxLevel]);
+        }
       }
     )
   );
@@ -306,7 +408,7 @@ function initMainMenu() {
   return all;
 }
 
-function initBuild(level) {
+function initBuild(level, ship) {
   console.log("Init Build", level.n);
   let all = [];
   hud.clear();
@@ -328,7 +430,7 @@ function initBuild(level) {
 
   // Coil Stuff
   if (true) {
-    let hl = String.fromCharCode(parseInt("2015", 16));
+    let hl = unicode("2015");
     all.push(
       new Text(
         60,
@@ -356,6 +458,30 @@ function initBuild(level) {
     all.push(new Rectangle(50, 70, 550, 570, "white"));
   } else {
     all.push(new Rectangle(50, 70, 550, 550, "white"));
+  }
+
+  // Rebuild the ship (if it exists)
+  if (ship) {
+    // Find the location of the command module (we want this at location 5,5) - if builder moved the command module :shrug:
+    let commandX = 0;
+    let commandY = 0;
+    for (let part of ship.parts) {
+      if (part instanceof CommandModule) {
+        commandX = part.x / PPM;
+        commandY = part.y / PPM;
+        break;
+      }
+    }
+    for (let part of ship.parts) {
+      let gridX = 5 - commandX + part.x / PPM;
+      let gridY = 5 - commandY + part.y / PPM;
+      all.push(part);
+      grid.addComponent(part, gridX, gridY);
+    }
+  } else {
+    let commandModule = newComponent(500, 500, 0, mouse, grid, null, 0);
+    all.push(commandModule);
+    grid.addComponent(commandModule, 5, 5, mouse);
   }
   /*
   grid.addComponent(
@@ -431,9 +557,25 @@ function initBuild(level) {
     );
   }
 
-  let commandModule = newComponent(500, 500, 0, mouse, grid, null, 0);
-  all.push(commandModule);
-  grid.addComponent(commandModule, 5, 5, mouse);
+  all.push(
+    new Button(
+      950,
+      640,
+      200,
+      50,
+      "Main Menu",
+      "black",
+      "white",
+      "35px Helvetica",
+      38,
+      mouse,
+      () => {
+        actors = initMainMenu();
+      },
+      true,
+      15
+    )
+  );
 
   all.push(
     new Button(
@@ -464,12 +606,110 @@ function initFly(grid, level) {
   let chron = new Chronometer(WIDTH - 300, HEIGHT - 20, hud);
   hud.add(chron);
 
+  let onCrash = (x, y, crashedShip, counter) => {
+    // Add flaming particles right under the PlanetGround
+    let start = 0;
+    for (let i = 0; i < actors.length; i++) {
+      if (actors[i] instanceof PlanetGround) {
+        start = i;
+      }
+    }
+
+    toAdd.push({
+      at: start,
+      value: new DirectionalParticle(
+        x,
+        y + PPM / 2,
+        0,
+        2, // Something
+        2, // Frequency
+        50, // Length
+        10, // Size
+        FIRE_COLORS,
+        10, // Spread
+        3 // Particle velocity
+      ),
+    });
+
+    // Show the defeat screen
+    hud.add(
+      new Future(globalCounter, 100, null, () => {
+        hud.add(new SlideScreen(counter));
+      })
+    );
+
+    hud.add(
+      new Future(globalCounter, 130, null, () => {
+        hud.add(
+          new Text(
+            WIDTH / 2,
+            HEIGHT * 0.25,
+            "You did not survive",
+            "40px Helvetica",
+            true
+          )
+        );
+      })
+    );
+
+    hud.add(
+      new Future(globalCounter, 150, null, () => {
+        hud.add(
+          new Button(
+            WIDTH / 2 - 20,
+            HEIGHT * 0.45,
+            200,
+            50,
+            "Try Again?",
+            "black",
+            "white",
+            "35px Helvetica",
+            38,
+            mouse,
+            () => {
+              actors = initBuild(levels[level.n], crashedShip);
+            },
+            true
+          )
+        );
+      })
+    );
+
+    hud.add(
+      new Future(globalCounter, 150, null, () => {
+        hud.add(
+          new Button(
+            WIDTH / 2 - 20,
+            HEIGHT * 0.65,
+            200,
+            50,
+            "      No      ",
+            "black",
+            "white",
+            "35px Helvetica",
+            38,
+            mouse,
+            () => {
+              actors = initMainMenu();
+            },
+            true
+          )
+        );
+      })
+    );
+  };
+
   let all = [];
-  let ship = new Ship(WIDTH / 2, (HEIGHT * 2) / 3, grid, keyboard);
+  let ship = new Ship(WIDTH / 2, (HEIGHT * 2) / 3, grid, keyboard, onCrash);
   let station = new SpaceStation(level, ship, function (counter) {
+    // Show the victory screen
     let finishTime = new Date();
     let elapsedTimeMs = Math.abs(finishTime - hud.startTime) / 1000;
     chron.lockedTime = elapsedTimeMs;
+    localStorage.setItem(
+      "MAX_LEVEL",
+      Math.max(level.n + 1, localStorage.getItem("MAX_LEVEL"))
+    );
     hud.add(new Confetti());
     hud.add(
       new Future(globalCounter, 100, null, () => {
@@ -483,7 +723,7 @@ function initFly(grid, level) {
           new Text(
             WIDTH / 2,
             HEIGHT * 0.25,
-            "You Survived!",
+            "You survived!",
             "40px Helvetica",
             true
           )
@@ -531,36 +771,82 @@ function initFly(grid, level) {
         );
       })
     );
-    hud.add(
-      new Future(globalCounter, 150, null, () => {
-        hud.add(
-          new Button(
-            WIDTH / 2,
-            HEIGHT * 0.65,
-            200,
-            50,
-            "Next Level",
-            "black",
-            "white",
-            "35px Helvetica",
-            38,
-            mouse,
-            () => {
-              actors = initBuild(levels[level.n+1]);
-            },
-            true
-          )
-        );
-      })
-    );
+    if (level.n === levels.length) {
+      hud.add(
+        new Future(globalCounter, 150, null, () => {
+          hud.add(
+            new Button(
+              WIDTH / 2 - 20,
+              HEIGHT * 0.65,
+              200,
+              50,
+              "Main Menu",
+              "black",
+              "white",
+              "35px Helvetica",
+              38,
+              mouse,
+              () => {
+                actors = initMainMenu();
+              },
+              true
+            )
+          );
+        })
+      );
+    } else {
+      hud.add(
+        new Future(globalCounter, 150, null, () => {
+          hud.add(
+            new Button(
+              WIDTH / 2 - 20,
+              HEIGHT * 0.65,
+              200,
+              50,
+              "Next Level",
+              "black",
+              "white",
+              "35px Helvetica",
+              38,
+              mouse,
+              () => {
+                actors = initBuild(levels[level.n + 1]);
+              },
+              true
+            )
+          );
+        })
+      );
+    }
   });
 
-  hud.add(new PlanetInfo(50, 70, level));
-  hud.add(new Speedometer(20, HEIGHT - 20, ship));
-  hud.add(new StationTracker(ship, station, mouse));
+  let ground = new PlanetGround(level);
 
-  all.push(new PlanetAtmosphere(ship, level.atmh));
-  all.push(new PlanetGround());
+  hud.add(new PlanetInfo(50, 70, level));
+  hud.add(new Speedometer(20, HEIGHT - 20, ship, ground));
+  hud.add(new StationTracker(ship, station, mouse));
+  hud.add(
+    new Button(
+      WIDTH - 100,
+      70,
+      48,
+      48,
+      unicode("27F3"),
+      "black",
+      "white",
+      "48px Helvetica",
+      36,
+      mouse,
+      function () {
+        actors = initBuild(level, ship);
+      },
+      true,
+      13
+    )
+  );
+
+  all.push(new PlanetAtmosphere(level.atmh));
+  all.push(ground);
   all.push(station);
 
   all.push(ship);
