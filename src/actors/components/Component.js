@@ -3,7 +3,7 @@ import { Rotate } from "../Rotate";
 import { Mouse } from "../Mouse";
 import { unicode } from "../../Utils.js";
 
-import { collide, isCollidingWith, toRad } from "../../Utils.js";
+import { collide, isCollidingWith, toRad, f } from "../../Utils.js";
 
 export class Component extends Actor {
   constructor(x, y, angle, mouse, grid, key, keyboard) {
@@ -64,7 +64,7 @@ export class Component extends Actor {
 
     // Draw label and rotation icon
     ctx.fillStyle = "white";
-    ctx.font = "16px Helvetica";
+    ctx.font = f(16);
     if (!this.grid.getKey(this)) {
       ctx.fillText(this.getName(), this.x, this.y - 10);
       this.rot.draw(ctx);
@@ -88,7 +88,7 @@ export class Component extends Actor {
       ctx.fillRect(this.x + 18, this.y + 15, 15, 17);
       //ctx.roundRect(this.x + 18, this.y + 15, 15, 0).fill();
       ctx.fillStyle = "white";
-      ctx.font = "15px Helvetica";
+      ctx.font = f(15);
       let textToDraw = this.key;
       if (this.key === "Shift") {
         textToDraw = unicode("21E7");
@@ -120,9 +120,7 @@ export class Component extends Actor {
         // Remove this component from the grid (if it's on the grid)
         let key = this.grid.getKey(this);
         if (key) {
-          console.log("REMOVED", key);
           delete this.grid.components[key];
-          console.log(this.grid.components);
         }
       }
     }

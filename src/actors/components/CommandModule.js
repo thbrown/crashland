@@ -10,7 +10,7 @@ export class CommandModule extends Component {
   }
 
   getSprite() {
-    return new Path2D(`m 0 50 h 50 v -50 h -50 v 50`);
+    return new Path2D(`m 0 50h50v-50h-50v50`);
   }
 
   getAttachments() {

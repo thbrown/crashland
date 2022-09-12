@@ -1,6 +1,7 @@
 import { Actor } from "./Actor";
 import { PPM } from "../Constants";
 import { HEIGHT } from "../Constants";
+import { f } from "../Utils";
 
 // https://stackoverflow.com/questions/1583123/circular-buffer-in-javascript
 const createRingBuffer = function (length) {
@@ -29,9 +30,7 @@ const createRingBuffer = function (length) {
 
 export class Speedometer extends Actor {
   constructor(x, y, ship, ground) {
-    super();
-    this.x = x;
-    this.y = y;
+    super(x,y);
     this.ship = ship;
     this.ground = ground;
     this.times = createRingBuffer(50);
@@ -43,7 +42,7 @@ export class Speedometer extends Actor {
       return;
     }
     ctx.fillStyle = "white";
-    ctx.font = "23px Helvetica";
+    ctx.font = f(23);
     let velocityMagnitude = Math.sqrt(
       Math.pow(this.ship.vx, 2) + Math.pow(this.ship.vy, 2)
     );

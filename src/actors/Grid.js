@@ -3,9 +3,7 @@ import { DIM } from "../Constants";
 
 export class Grid extends Actor {
   constructor(x, y, mouse) {
-    super();
-    this.x = x;
-    this.y = y;
+    super(x,y);
     this.num = 11;
     this.mouse = mouse;
     this.components = {};

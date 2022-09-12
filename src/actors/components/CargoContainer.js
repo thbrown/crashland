@@ -11,7 +11,7 @@ export class CargoContainer extends Component {
 
   getSprite() {
     return new Path2D(
-      `m 0 0 v 20 h 20 v 10 h -20 v 20 h 20v -20h 10 v 20 h 20 v -20h -20 v -10 h 20 v -20 h -20 v 20 h -10 v -20 h -20`
+      `m 0 0 v20h20v10h-20v20h20v-20h10v20h20v-20h-20v-10h20v-20h-20v20h-10v-20h-20`
     );
   }
 

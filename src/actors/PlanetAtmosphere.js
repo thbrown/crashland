@@ -1,7 +1,5 @@
 import { Actor } from "./Actor";
 import { WIDTH } from "../Constants";
-
-
 const SPACE_LINE = -3000;
 
 export class PlanetAtmosphere extends Actor {

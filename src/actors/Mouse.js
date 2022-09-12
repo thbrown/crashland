@@ -4,9 +4,7 @@ import { WIDTH, HEIGHT } from "../Constants";
 
 export class Mouse extends Actor {
   constructor(x, y) {
-    super();
-    this.x = x;
-    this.y = y;
+    super(x,y);
     this.collide = true;
     this.w = 3;
     this.h = 3;

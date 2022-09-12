@@ -19,9 +19,7 @@ export class Button extends Actor {
     centered,
     buffer
   ) {
-    super();
-    this.x = x;
-    this.y = y;
+    super(x,y);
     this.text = text;
     this.buttonColor = buttonColor;
     this.originalButtonColor = buttonColor;

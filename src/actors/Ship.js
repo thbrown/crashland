@@ -234,6 +234,11 @@ export class Ship extends Actor {
       this.keyboardFreeze = false
     }
 
+    // Remove ship on timeout
+    if(this.timeout) {
+      return true;
+    }
+
     // Don't update anything if the ship is frozen
     if(this.freeze || this.keyboardFreeze) {
       return;
@@ -241,7 +246,7 @@ export class Ship extends Actor {
 
     // Crash
     if(isCollidingWith(PlanetGround, collisions)) {
-      this.onCrash(this.x + this.COM.x, this.y + this.COM.y, this, globalCounter);
+      this.onCrash(this, globalCounter, "crash", this.chron);
       return true;
     }
 

@@ -2,9 +2,7 @@ import { Actor } from "./Actor";
 
 export class Rectangle extends Actor {
   constructor(x, y, w, h, color, fill) {
-    super();
-    this.x = x;
-    this.y = y;
+    super(x,y);
     this.w = w;
     this.h = h;
     this.color = color;

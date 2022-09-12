@@ -3,9 +3,7 @@ import { Particle } from "./Particle";
 
 export class DirectionalParticle extends Actor {
   constructor(x, y, angle, count, frequency, length, size, color, spread, velocity) {
-    super();
-    this.x = x;
-    this.y = y;
+    super(x,y);
     this.angle = angle;
     this.length = length;
     this.size = size;

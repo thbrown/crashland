@@ -14,3 +14,4 @@ export const FIRE_COLORS = [
 
 // Pixels per meter, for display purposes
 export const PPM = 50;
+

@@ -3,10 +3,8 @@ import { getColor, randomIntFromInterval } from "../Utils.js";
 
 export class Particle extends Actor {
   constructor(x, y, angle, length, size, color, spread, velocity) {
-    super();
+    super(x,y);
     this.speed = velocity ? velocity : 15;
-    this.x = x;
-    this.y = y;
     this.angle = angle;
     this.length = length;
     this.size = size;

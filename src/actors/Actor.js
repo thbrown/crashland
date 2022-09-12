@@ -1,8 +1,7 @@
 export class Actor {
-  constructor(x, y, shape) {
+  constructor(x, y) {
     this.x = x;
     this.y = y;
-    this.shape = shape;
   }
 
   draw(ctx) {}

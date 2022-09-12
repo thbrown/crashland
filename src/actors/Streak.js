@@ -4,9 +4,7 @@ import { WIDTH, HEIGHT } from "../Constants.js";
 
 export class Streak extends Actor {
   constructor(x, y, length) {
-    super();
-    this.x = x;
-    this.y = y;
+    super(x,y);
     this.length = length;
   }
 

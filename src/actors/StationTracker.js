@@ -2,6 +2,7 @@ import { Actor } from "./Actor";
 import { pthag } from "../Utils";
 import { WIDTH, HEIGHT, PPM } from "../Constants";
 import { toRad } from "../Utils";
+import { f } from "../Utils";
 
 export class StationTracker extends Actor {
   constructor(ship, station, mouse) {
@@ -24,17 +25,6 @@ export class StationTracker extends Actor {
 
     let xPer = ((WIDTH / 2) - 20) / xDist;
     let yPer = ((HEIGHT / 2) - 20) / yDist;
-
-    /*
-    ctx.fillStyle = "white";
-    ctx.font = "30px Helvetica";
-    ctx.fillText(
-      `Dist: ${distToStation.toFixed(2)} px ${xPer.toFixed(2)} ${yPer.toFixed(
-        2
-      )}`,
-      100,
-      100
-    );*/
 
     // Draw indicator if station is off-screen
     if (Math.abs(xPer) < 1 || Math.abs(yPer) < 1) {
@@ -115,8 +105,7 @@ export class StationTracker extends Actor {
       ctx.rotate(toRad(rot));
 
       ctx.fillStyle = "white";
-      ctx.font = "20px Helvetica";
-
+      ctx.font = f(20);
 
       let labelText = `Space Station`;
       let halfLabelTextWidth = ctx.measureText(labelText).width/2;

@@ -1,16 +1,15 @@
 import { Actor } from "./Actor";
+import { f } from "../Utils";
 
 export class PlanetInfo extends Actor {
   constructor(x, y, level) {
-    super();
-    this.x = x;
-    this.y = y;
+    super(x,y);
     this.level = level;
   };
 
   draw(ctx) {
     ctx.fillStyle = "white";
-    ctx.font = "23px Helvetica";
+    ctx.font = f(23);
     ctx.fillText(`Planet: ${this.level.pn}`, this.x, this.y);
   }
 

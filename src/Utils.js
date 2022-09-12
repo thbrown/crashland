@@ -144,31 +144,56 @@ export function unicode(hex) {
   return String.fromCharCode(parseInt(hex, 16));
 }
 
+// Sound function that respects mute
+export function sound(sound) {
+  if(localStorage.getItem("MT") == "t") {
+    return;
+  }
+  zzfx(...sound);
+}
+
 export function playThrust(vol,bit) {
-  zzfx(...[vol,.3,444,,.29,.23,2,3.6,,,,,.15,1,-15,bit,,.3]); // Explosion 90
+  sound([vol,.3,444,,.29,.23,2,3.6,,,,,.15,1,-15,bit,,.3]); // Explosion 90
 }
 
 // Keep this global so we don't have multiple beepers happening
 let beep = undefined;
 export function startBeep() {
-  beep = setInterval(()=>{zzfx(...[1.27,0,440,.01,.01,.01,,2.58,,.3,,.05,.04,,.1,-0.1,,.6,.01]);}, 200)
+  if(beep === undefined) {
+    beep = setInterval(()=>{sound([1.27,0,440,.01,.01,.01,,2.58,,.3,,.05,.04,,.1,-0.1,,.6,.01]);}, 200)
+  }
 }
 export function stopBeep() {
   clearInterval(beep);
+  beep = undefined;
+}
+
+// This beeping is for the countdown
+let countBeep = undefined;
+export function startCountBeep() {
+  if(countBeep === undefined) {
+    let soundInst = [,0,261.6256,,.58,.07,3,1.52,,,,,,.1,,,,.26,.09];
+    sound(soundInst);
+    countBeep = setInterval(()=>{sound(soundInst);}, 1000)
+  }
+}
+export function stopCountBeep() {
+  clearInterval(countBeep);
+  countBeep = undefined;
 }
 
 let audioNode = undefined;
 export function playMusic() {
+  if(localStorage.getItem("MO") == "t") {
+    return;
+  }
+
   // Create a song
-  let song = [[[,0,400,,.06,.13,,.21,.5,,,.05,.19,,.7,,.16,,.03,.38],[,0]],[[[,,5,5,10,5,12,,10,5,,10,10,5,12,12,10,8,3,3,8,3,10,,8,3,,3,8,3,10,10,8,6]]],[0],50,{"title":"Background","instruments":["Instrument 0","Instrument 1"],"patterns":["Pattern 0"]}]
+  let song = [[[,0,400,,.06,.13,,.21,.5,,,.05,.19,,.7,,.16,,.03,.38]],[[[,,5,5,10,5,12,,10,5,,10,10,5,12,12,10,8,3,3,8,3,10,,8,3,,3,8,3,10,10,8,6]]],[0],50,{"title":"","instruments":["I"],"patterns":["P"]}]
   let mySongData = zzfxM(...song);
   // Play the song (returns a AudioBufferSourceNode)
   audioNode = zzfxP(...mySongData);
   audioNode.loop = true;
-  //setInterval(()=>{myAudioNode.playbackRate = 5; console.log("Updated", myAudioNode.playbackRate)}, 1500)
-  //console.log("PLAYING!!!")
-  // Stop the song
-  //myAudioNode.stop();
 }
 
 export function stopMusic() {
@@ -176,3 +201,10 @@ export function stopMusic() {
     audioNode.stop();
   }
 }
+
+export function f(v) {
+  return `${v}px Helvetica`;
+}
+
+
+

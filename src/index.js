@@ -27,7 +27,7 @@ import { CommandModule } from "./actors/components/CommandModule.js";
 import { Scaffolding } from "./actors/Scaffolding.js";
 
 import { WIDTH, HEIGHT, FIRE_COLORS, PPM, DIM } from "./Constants.js";
-import { randomIntFromInterval, collide, unicode, stopBeep, playMusic, stopMusic } from "./Utils.js";
+import { randomIntFromInterval, collide, unicode, stopBeep, playMusic, stopMusic, sound, f } from "./Utils.js";
 import { Chronometer } from "./actors/Chronometer.js";
 import { PlanetInfo } from "./actors/PlanetInfo.js";
 
@@ -218,11 +218,12 @@ const levels = [
     sy: 300, // Space station Y coord
     sm: 300, // Space station docking margin
     st: 100, // Space station docking time
+    t: 30, // Max time to doc
     atmh: -2000, // Atmosphere height in px
   },
   {
     n: 1,
-    pn: "Recta!", // Planet name
+    pn: "Recta", // Planet name
     pc: "yellow",
     pg: 1, // Planet gravity
     pa: 1, // Planet atmosphere
@@ -246,6 +247,7 @@ const levels = [
     sy: -1500, // Space station Y coord
     sm: 100, // Space station docking margin
     st: 100, // Space station docking time
+    t: 15,
     atmh: -2000, // Atmosphere height in px
   },
   {
@@ -274,6 +276,7 @@ const levels = [
     sy: 400,
     sm: 300,
     st: 300,
+    t: 30,
     atmh: -2000,
   },
   {
@@ -299,6 +302,7 @@ const levels = [
     sy: 300, // Space station Y coord
     sm: 300, // Space station docking margin
     st: 100, // Space station docking time
+    t: 30,
     atmh: -2000, // Atmosphere height in px
   },
 ];
@@ -407,7 +411,7 @@ function initMainMenu() {
       )
     );
   }
-  all.push(new Text(20, 100, "Spaceship Resurrection", "100px Helvetica"));
+  all.push(new Text(20, 100, "Spaceship Resurrection", f(100)));
 
   let particles = new DirectionalParticle(
     540,
@@ -474,8 +478,8 @@ function initMainMenu() {
                   new Text(
                     20,
                     270,
-                    "You've crashed on a hostile planet, but you've escaped death for now...",
-                    "39px Helvetica"
+                    "You've crashed on a empty planet, but you've escaped death for now...",
+                    f(39)
                   )
                 );
                 // Queue Instructions 2
@@ -486,7 +490,7 @@ function initMainMenu() {
                         20,
                         310,
                         "However, the same can't be said for your spaceship.",
-                        "39px Helvetica"
+                        f(39)
                       )
                     );
                     // Queue Instructions 2
@@ -497,15 +501,15 @@ function initMainMenu() {
                             20,
                             400,
                             "Rebuild your ship and escape to the space station to survive.",
-                            "39px Helvetica"
+                            f(39)
                           )
                         );
                         actors.push(
                           new Text(
                             20,
                             490,
-                            "[Press any key to continue]",
-                            "39px Helvetica"
+                            "[Press any key]",
+                            f(39)
                           )
                         );
                         // Queue Remove All & Show Build Screen
@@ -526,9 +530,9 @@ function initMainMenu() {
     );
   };
 
-  let maxLevel = localStorage.getItem("MAX_LEVEL");
+  let maxLevel = localStorage.getItem("ML");
   if (maxLevel !== undefined) {
-    maxLevel = Math.min(localStorage.getItem("MAX_LEVEL"), levels.length - 1); // Don't show more levels than we have
+    maxLevel = Math.min(localStorage.getItem("ML"), levels.length - 1); // Don't show more levels than we have
     for (let level = 0; level < maxLevel; level++) {
       all.push(
         new Button(
@@ -539,7 +543,7 @@ function initMainMenu() {
           `${level + 1}`,
           "black",
           "white",
-          "70px Helvetica",
+          f(70),
           75,
           mouse,
           () => {
@@ -564,7 +568,7 @@ function initMainMenu() {
       "Play Now",
       "black",
       "white",
-      "70px Helvetica",
+      f(70),
       75,
       mouse,
       () => {
@@ -581,7 +585,6 @@ function initMainMenu() {
 }
 
 function initBuild(level, rebuildShip) {
-  console.log("Init Build", level.n, rebuildShip);
   let all = [];
   hud.clear();
   stopBeep();
@@ -594,8 +597,8 @@ function initBuild(level, rebuildShip) {
     new Text(
       20,
       40,
-      'Click and drag the components to rebuild your ship! When finished click "Launch!"',
-      "30px Helvetica"
+      'Click and drag the components to rebuild your ship! Then click "Launch!"',
+      f(30)
     )
   );
   all.push(new Rectangle(650, 70, 550, 550, "white"));
@@ -664,7 +667,7 @@ function initBuild(level, rebuildShip) {
         60,
         460,
         `${hl.repeat(12)} Bonus Coil Components ${hl.repeat(12)}`,
-        "15px Helvetica",
+        f(15),
         false,
         "red"
       )
@@ -712,7 +715,7 @@ function initBuild(level, rebuildShip) {
       "Main Menu",
       "black",
       "white",
-      "35px Helvetica",
+      f(35),
       38,
       mouse,
       () => {
@@ -732,7 +735,7 @@ function initBuild(level, rebuildShip) {
       "Launch!",
       "black",
       "white",
-      "35px Helvetica",
+      f(35),
       38,
       mouse,
       () => {
@@ -746,17 +749,18 @@ function initBuild(level, rebuildShip) {
 }
 
 function initFly(grid, level) {
-  console.log("INIT FLY", level.n);
   hud.clear();
   hud.resetTimer();
-  let chron = new Chronometer(WIDTH - 300, HEIGHT - 20, hud);
-  hud.add(chron);
 
   playMusic();
 
-  let onCrash = (x, y, crashedShip, counter) => {
+  let onDefeat = (crashedShip, counter, reason, chron) => {
     // Play crash sound!
-    zzfx(...[1.02,,605,.04,.02,.49,4,4.41,.6,.4,,,,.1,,.8,,.43,.16]);
+    sound([1.02,,605,.04,.02,.49,4,4.41,.6,.4,,,,.1,,.8,,.43,.16]);
+
+    // Lock time
+    const timeout = "timeout";
+    chron.freeze(reason === timeout ? 0 : undefined);
 
     // Add flaming particles right under the PlanetGround
     let start = 0;
@@ -772,8 +776,8 @@ function initFly(grid, level) {
       toAdd.push({
         at: start,
         value: new DirectionalParticle(
-          shipPoints[i].x,
-          WIDTH / 2 - 1, // Copied from PlanetGround TODO: DRY
+          reason === timeout ? crashedShip.x + crashedShip.COM.x : shipPoints[i].x,
+          reason === timeout ? crashedShip.y + crashedShip.COM.y : WIDTH / 2 - 1, // Copied from PlanetGround TODO: DRY
           0,
           2, // Something
           2, // Frequency
@@ -799,8 +803,8 @@ function initFly(grid, level) {
           new Text(
             WIDTH / 2,
             HEIGHT * 0.25,
-            "You did not survive",
-            "40px Helvetica",
+            `You did not survive (${reason})`,
+            f(40),
             true
           )
         );
@@ -818,7 +822,7 @@ function initFly(grid, level) {
             "Try Again?",
             "black",
             "white",
-            "35px Helvetica",
+            f(35),
             38,
             mouse,
             () => {
@@ -834,20 +838,21 @@ function initFly(grid, level) {
       new Future(globalCounter, 150, null, () => {
         hud.add(
           new Button(
-            WIDTH / 2 - 20,
+            WIDTH / 2 - 80,
             HEIGHT * 0.65,
             200,
             50,
-            "      No      ",
+            "No",
             "black",
             "white",
-            "35px Helvetica",
+            f(35),
             38,
             mouse,
             () => {
               actors = initMainMenu();
             },
-            true
+            true,
+            80
           )
         );
       })
@@ -857,18 +862,49 @@ function initFly(grid, level) {
   let ground = new PlanetGround(level);
 
   let all = [];
-  let ship = new Ship(WIDTH / 2, (HEIGHT * 2) / 3, grid, keyboard, onCrash);
+  let ship = new Ship(WIDTH / 2, (HEIGHT * 2) / 3, grid, keyboard, onDefeat);
   ship.y = ground.y - (ship.h + DIM); // One block above the ground
+
+  let chron = new Chronometer(WIDTH - 300, HEIGHT - 20, hud, level, ship, onDefeat);
+  ship.chron = chron; // Ugg... circular ref, but I need to get this working
+  hud.add(chron);
 
   let station = new SpaceStation(level, ship, function (counter) {
     // Show the victory screen
     let finishTime = new Date();
     let elapsedTimeMs = Math.abs(finishTime - hud.startTime) / 1000;
-    chron.lockedTime = elapsedTimeMs;
+    chron.freeze(elapsedTimeMs);
     localStorage.setItem(
-      "MAX_LEVEL",
-      Math.max(level.n + 1, localStorage.getItem("MAX_LEVEL"))
+      "ML",
+      Math.max(level.n + 1, localStorage.getItem("ML"))
     );
+
+    // Stop beeping (if present)
+    stopBeep();
+
+    // Update High Score
+    let remainingTime = (level.t - elapsedTimeMs);
+    let score = remainingTime + 5 * ship.getCargoCount();
+    let highScores = localStorage.getItem("HS");
+    let prevHighScore = undefined;
+    let jsonHighScores = undefined;
+    if(highScores) {
+      jsonHighScores = JSON.parse(highScores);
+      let bestScore = jsonHighScores[level.pn];
+      if(bestScore === undefined) {
+        jsonHighScores[level.pn] = score;
+      } else {
+        prevHighScore = jsonHighScores[level.pn];
+        if(score > bestScore) {
+          jsonHighScores[level.pn] = score;
+        }
+      }
+    } else {
+      jsonHighScores = {};
+      jsonHighScores[level.pn] = score;
+    }
+    localStorage.setItem("HS", JSON.stringify(jsonHighScores))
+    
     hud.add(new Confetti());
     hud.add(
       new Future(globalCounter, 100, null, () => {
@@ -883,7 +919,7 @@ function initFly(grid, level) {
             WIDTH / 2,
             HEIGHT * 0.25,
             "You survived!",
-            "40px Helvetica",
+            f(40),
             true
           )
         );
@@ -895,8 +931,8 @@ function initFly(grid, level) {
           new Text(
             WIDTH / 2,
             HEIGHT * 0.35,
-            `Elapsed Time: ${elapsedTimeMs.toFixed(3)} seconds`,
-            "20px Helvetica",
+            `Remaining time: ${remainingTime.toFixed(3)} s`,
+            f(20),
             true
           )
         );
@@ -908,8 +944,8 @@ function initFly(grid, level) {
           new Text(
             WIDTH / 2,
             HEIGHT * 0.45,
-            `Cargo Saved: ${ship.getCargoCount()} (-5 per container)`,
-            "20px Helvetica",
+            `Cargo saved: ${ship.getCargoCount()} (+5 pts each)`,
+            f(20),
             true
           )
         );
@@ -921,28 +957,40 @@ function initFly(grid, level) {
           new Text(
             WIDTH / 2,
             HEIGHT * 0.55,
-            `Total Score: ${(elapsedTimeMs - 5 * ship.getCargoCount()).toFixed(
-              3
-            )}`,
-            "25px Helvetica",
+            `Total score: ${score.toFixed(3)}`,
+            f(25),
             true
           )
         );
       })
     );
-    if (level.n === levels.length) {
+    hud.add(
+      new Future(globalCounter, 145, null, () => {
+        hud.add(
+          new Text(
+            WIDTH / 2,
+            HEIGHT * 0.65,
+            prevHighScore === undefined || score > prevHighScore ? `New record (${prevHighScore === undefined ? `no previous record` : `beat ${prevHighScore.toFixed(3)}`})` : `Record is ${prevHighScore.toFixed(3)}`,
+            f(25),
+            true,
+            prevHighScore === undefined || score > prevHighScore? "yellow" : "lightgrey"
+          )
+        );
+      })
+    );
+    if (level.n >= (levels.length - 1)) {
       hud.add(
         new Future(globalCounter, 150, null, () => {
           hud.add(
             new Button(
               WIDTH / 2 - 20,
-              HEIGHT * 0.65,
+              HEIGHT * 0.75,
               200,
               50,
               "Main Menu",
               "black",
               "white",
-              "35px Helvetica",
+              f(35),
               38,
               mouse,
               () => {
@@ -960,13 +1008,13 @@ function initFly(grid, level) {
           hud.add(
             new Button(
               WIDTH / 2 - 20,
-              HEIGHT * 0.65,
+              HEIGHT * 0.73,
               200,
               50,
               "Next Level",
               "black",
               "white",
-              "35px Helvetica",
+              f(35),
               38,
               mouse,
               () => {
@@ -985,14 +1033,14 @@ function initFly(grid, level) {
   hud.add(new StationTracker(ship, station, mouse));
   hud.add(
     new Button(
-      WIDTH - 100,
+      WIDTH - 240,
       70,
       48,
       48,
       unicode("27F3"),
       "black",
       "white",
-      "48px Helvetica",
+      f(48),
       36,
       mouse,
       function () {
@@ -1002,6 +1050,60 @@ function initFly(grid, level) {
       13
     )
   );
+
+  // Mute Buttons
+  let addMuteButtonOne = function () {
+    hud.add(
+      new Button(
+        WIDTH - 160,
+        70,
+        48,
+        48,
+        localStorage.getItem("MO") == "t" ? '\u{1F507}' : '\u{1F508}', // Speaker
+        "black",
+        "white",
+        f(35),
+        36,
+        mouse,
+        function () {
+          if(localStorage.getItem("MO") == "t") {
+            localStorage.setItem("MO","f");
+            playMusic();
+          } else {
+            localStorage.setItem("MO","t");
+            stopMusic();
+          }
+          addMuteButtonOne();
+        },
+        true,
+        12
+      )
+    );
+  }
+  addMuteButtonOne();
+  let addMuteButtonTwo = function () {
+    hud.add(
+      new Button(
+        WIDTH - 100,
+        70,
+        48,
+        48,
+        localStorage.getItem("MT") == "t" ? '\u{1F515}' : '\u{1F514}', // Bell
+        "black",
+        "white",
+        f(35),
+        36,
+        mouse,
+        function () {
+          localStorage.setItem("MT", localStorage.getItem("MT") == "t" ? "f" : "t");
+          addMuteButtonTwo();
+        },
+        true,
+        8
+      )
+    );
+  }
+  addMuteButtonTwo();
 
   all.push(new PlanetAtmosphere(level.atmh));
   all.push(ground);
