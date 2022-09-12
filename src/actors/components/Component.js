@@ -32,6 +32,10 @@ export class Component extends Actor {
     this.keyboard = keyboard;
   }
 
+  updateGrid(newGrid) {
+    this.grid = newGrid;
+  }
+
   draw(ctx) {
     ctx.save();
     ctx.fillStyle = "blue";
@@ -116,7 +120,9 @@ export class Component extends Actor {
         // Remove this component from the grid (if it's on the grid)
         let key = this.grid.getKey(this);
         if (key) {
+          console.log("REMOVED", key);
           delete this.grid.components[key];
+          console.log(this.grid.components);
         }
       }
     }

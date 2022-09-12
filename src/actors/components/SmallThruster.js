@@ -3,6 +3,7 @@ import { DirectionalParticle } from "../DirectionalParticle.js";
 import { FIRE_COLORS } from "../../Constants.js";
 
 import { getThrusterSprite } from "../../Utils.js";
+import { playThrust } from "../../Utils.js";
 
 export class SmallThruster extends Component {
   constructor(x, y, angle, mouse, grid, key, keyboard) {
@@ -45,6 +46,9 @@ export class SmallThruster extends Component {
     this.particles.y = this.y + this.h / 2;
     this.particles.angle = this.angle + 180;
     this.particles.update(collisions, globalCounter);
+    if (this.keyboard.has(this.key)) {
+      playThrust(0.3, .2);
+    }
   }
 
   getThrust() {

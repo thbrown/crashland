@@ -1,6 +1,10 @@
 import { Background } from "./actors/Background.js";
 import { Button } from "./actors/Button.js";
-import { newComponent, getCount } from "./actors/components/ComponentFactory";
+import {
+  newComponent,
+  getCount,
+  getType,
+} from "./actors/components/ComponentFactory";
 import { DirectionalParticle } from "./actors/DirectionalParticle.js";
 import { Future } from "./actors/Future.js";
 import { Grid } from "./actors/Grid.js";
@@ -20,16 +24,176 @@ import { StationTracker } from "./actors/StationTracker.js";
 import { Confetti } from "./actors/Confetti.js";
 import { SlideScreen } from "./actors/SlideScreen.js";
 import { CommandModule } from "./actors/components/CommandModule.js";
+import { Scaffolding } from "./actors/Scaffolding.js";
 
-import { WIDTH, HEIGHT, FIRE_COLORS, PPM } from "./Constants.js";
-import {
-  randomIntFromInterval,
-  collide,
-  randomLetter,
-  unicode,
-} from "./Utils.js";
+import { WIDTH, HEIGHT, FIRE_COLORS, PPM, DIM } from "./Constants.js";
+import { randomIntFromInterval, collide, unicode, stopBeep, playMusic, stopMusic } from "./Utils.js";
 import { Chronometer } from "./actors/Chronometer.js";
 import { PlanetInfo } from "./actors/PlanetInfo.js";
+
+// ZzFX (https://github.com/KilledByAPixel/ZzFX)
+window.zzfxP = (...t) => {
+  let e = zzfxX.createBufferSource(),
+    f = zzfxX.createBuffer(t.length, t[0].length, zzfxR);
+  t.map((d, i) => f.getChannelData(i).set(d)),
+    (e.buffer = f),
+    e.connect(zzfxX.destination),
+    e.start();
+  return e;
+};
+window.zzfxG = (
+  q = 1,
+  k = 0.05,
+  c = 220,
+  e = 0,
+  t = 0,
+  u = 0.1,
+  r = 0,
+  F = 1,
+  v = 0,
+  z = 0,
+  w = 0,
+  A = 0,
+  l = 0,
+  B = 0,
+  x = 0,
+  G = 0,
+  d = 0,
+  y = 1,
+  m = 0,
+  C = 0
+) => {
+  let b = 2 * Math.PI,
+    H = (v *= (500 * b) / zzfxR ** 2),
+    I = ((0 < x ? 1 : -1) * b) / 4,
+    D = (c *= ((1 + 2 * k * Math.random() - k) * b) / zzfxR),
+    Z = [],
+    g = 0,
+    E = 0,
+    a = 0,
+    n = 1,
+    J = 0,
+    K = 0,
+    f = 0,
+    p,
+    h;
+  e = 99 + zzfxR * e;
+  m *= zzfxR;
+  t *= zzfxR;
+  u *= zzfxR;
+  d *= zzfxR;
+  z *= (500 * b) / zzfxR ** 3;
+  x *= b / zzfxR;
+  w *= b / zzfxR;
+  A *= zzfxR;
+  l = (zzfxR * l) | 0;
+  for (h = (e + m + t + u + d) | 0; a < h; Z[a++] = f)
+    ++K % ((100 * G) | 0) ||
+      ((f = r
+        ? 1 < r
+          ? 2 < r
+            ? 3 < r
+              ? Math.sin((g % b) ** 3)
+              : Math.max(Math.min(Math.tan(g), 1), -1)
+            : 1 - (((((2 * g) / b) % 2) + 2) % 2)
+          : 1 - 4 * Math.abs(Math.round(g / b) - g / b)
+        : Math.sin(g)),
+      (f =
+        (l ? 1 - C + C * Math.sin((2 * Math.PI * a) / l) : 1) *
+        (0 < f ? 1 : -1) *
+        Math.abs(f) ** F *
+        q *
+        zzfxV *
+        (a < e
+          ? a / e
+          : a < e + m
+          ? 1 - ((a - e) / m) * (1 - y)
+          : a < e + m + t
+          ? y
+          : a < h - d
+          ? ((h - a - d) / u) * y
+          : 0)),
+      (f = d
+        ? f / 2 +
+          (d > a ? 0 : ((a < h - d ? 1 : (h - a) / d) * Z[(a - d) | 0]) / 2)
+        : f)),
+      (p = (c += v += z) * Math.sin(E * x - I)),
+      (g += p - p * B * (1 - ((1e9 * (Math.sin(a) + 1)) % 2))),
+      (E += p - p * B * (1 - ((1e9 * (Math.sin(a) ** 2 + 1)) % 2))),
+      n && ++n > A && ((c += w), (D += w), (n = 0)),
+      !l || ++J % l || ((c = D), (v = H), (n = n || 1));
+  return Z;
+};
+window.zzfxV = 0.3;
+window.zzfxR = 44100;
+window.zzfxX = new (window.AudioContext || webkitAudioContext)();
+window.zzfx = (...t) => zzfxP(zzfxG(...t));
+
+//! ZzFXM (v2.0.3) | (C) Keith Clark | MIT | https://github.com/keithclark/ZzFXM
+window.zzfxM = (n, f, t, e = 125) => {
+  let l,
+    o,
+    z,
+    r,
+    g,
+    h,
+    x,
+    a,
+    u,
+    c,
+    d,
+    i,
+    m,
+    p,
+    G,
+    M = 0,
+    R = [],
+    b = [],
+    j = [],
+    k = 0,
+    q = 0,
+    s = 1,
+    v = {},
+    w = ((zzfxR / e) * 60) >> 2;
+  for (; s; k++)
+    (R = [(s = a = d = m = 0)]),
+      t.map((e, d) => {
+        for (
+          x = f[e][k] || [0, 0, 0],
+            s |= !!f[e][k],
+            G = m + (f[e][0].length - 2 - !a) * w,
+            p = d == t.length - 1,
+            o = 2,
+            r = m;
+          o < x.length + p;
+          a = ++o
+        ) {
+          for (
+            g = x[o],
+              u = (o == x.length + p - 1 && p) || (c != (x[0] || 0)) | g | 0,
+              z = 0;
+            z < w && a;
+            z++ > w - 99 && u ? (i += (i < 1) / 99) : 0
+          )
+            (h = ((1 - i) * R[M++]) / 2 || 0),
+              (b[r] = (b[r] || 0) - h * q + h),
+              (j[r] = (j[r++] || 0) + h * q + h);
+          g &&
+            ((i = g % 1),
+            (q = x[1] || 0),
+            (g |= 0) &&
+              (R = v[[(c = x[(M = 0)] || 0), g]] =
+                v[[c, g]] ||
+                ((l = [...n[c]]),
+                (l[2] *= 2 ** ((g - 12) / 12)),
+                g > 0 ? zzfxG(...l) : [])));
+        }
+        m = G;
+      });
+  return [b, j];
+};
+
+// TIME UP: zzfx(...[,,360,,.05,.03,2,.74,,,713,.06,,,-130,,,,.23,.85]);
 
 const levels = [
   {
@@ -58,13 +222,20 @@ const levels = [
   },
   {
     n: 1,
-    pn: "Recta", // Planet name
+    pn: "Recta!", // Planet name
     pc: "yellow",
     pg: 1, // Planet gravity
     pa: 1, // Planet atmosphere
     parts: [
       // Ship components
       { id: 1, a: "a" },
+      { id: 2, a: "b" },
+      { id: 3, a: "c" },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
       { id: 4 },
     ],
     cparts: [
@@ -106,7 +277,7 @@ const levels = [
     atmh: -2000,
   },
   {
-    n: 4,
+    n: 3,
     pn: "Coruscant", // Planet name
     pg: 1, // Planet gravity
     pa: 1, // Planet atmosphere
@@ -223,6 +394,8 @@ window.requestAnimationFrame(clock);
 function initMainMenu() {
   hud.clear();
   centeredActor = undefined;
+  stopBeep();
+  stopMusic();
   let all = [];
   all.push(background);
   for (let i = 0; i < 100; i++) {
@@ -357,7 +530,6 @@ function initMainMenu() {
   if (maxLevel !== undefined) {
     maxLevel = Math.min(localStorage.getItem("MAX_LEVEL"), levels.length - 1); // Don't show more levels than we have
     for (let level = 0; level < maxLevel; level++) {
-      console.log(level, maxLevel);
       all.push(
         new Button(
           965 - maxLevel * 100 + 100 * level,
@@ -408,10 +580,12 @@ function initMainMenu() {
   return all;
 }
 
-function initBuild(level, ship) {
-  console.log("Init Build", level.n);
+function initBuild(level, rebuildShip) {
+  console.log("Init Build", level.n, rebuildShip);
   let all = [];
   hud.clear();
+  stopBeep();
+  stopMusic();
   centeredActor = undefined;
   background.fadeStart = undefined;
   background.color = "black";
@@ -427,9 +601,63 @@ function initBuild(level, ship) {
   all.push(new Rectangle(650, 70, 550, 550, "white"));
 
   let grid = new Grid(650, 70, mouse);
+  all.push(grid);
+
+  // Rebuild the ship (if it exists)
+  let filteredLevelComponents = level.parts.slice(); // copy
+  let filteredCoilComponents = level.cparts.slice(); // copy
+  if (rebuildShip) {
+    // Find the location of the command module (we want this at location 5,5) - if builder moved the command module :shrug:
+    let commandX = 0;
+    let commandY = 0;
+    for (let part of rebuildShip.parts) {
+      if (part instanceof CommandModule) {
+        commandX = part.x / PPM;
+        commandY = part.y / PPM;
+        break;
+      }
+    }
+    // Remove each part from parts lists so they can't be added again
+    for (let part of rebuildShip.parts) {
+      // Get rid of the reference to the old grid
+      part.updateGrid(grid);
+
+      let skip = false;
+      // First remove from the normal level parts
+      for (let i = 0; i < filteredLevelComponents.length; i++) {
+        let levelPart = filteredLevelComponents[i];
+        if (levelPart.a === part.key && part instanceof getType(levelPart.id)) {
+          filteredLevelComponents.splice(i, 1);
+          skip = true;
+          break;
+        }
+      }
+      // Then remove it from the coil parts if we didn't find it in the normal parts
+      if (!skip) {
+        for (let i = 0; i < filteredCoilComponents.length; i++) {
+          let coilPart = filteredCoilComponents[i];
+          if (coilPart.a === part.key && part instanceof getType(coilPart.id)) {
+            filteredCoilComponents.splice(i, 1);
+            break;
+          }
+        }
+      }
+    }
+
+    for (let part of rebuildShip.parts) {
+      let gridX = 5 - commandX + part.x / PPM;
+      let gridY = 5 - commandY + part.y / PPM;
+      all.push(part);
+      grid.addComponent(part, gridX, gridY);
+    }
+  } else {
+    let commandModule = newComponent(500, 500, 0, mouse, grid, null, 0);
+    all.push(commandModule);
+    grid.addComponent(commandModule, 5, 5);
+  }
 
   // Coil Stuff
-  if (true) {
+  if (document.monetization && document.monetization.state === "started") {
     let hl = unicode("2015");
     all.push(
       new Text(
@@ -441,7 +669,7 @@ function initBuild(level, ship) {
         "red"
       )
     );
-    for (let i = 0; i < level.cparts.length; i++) {
+    for (let i = 0; i < filteredCoilComponents.length; i++) {
       all.push(
         newComponent(
           60 + (i % 5) * 102,
@@ -449,8 +677,8 @@ function initBuild(level, ship) {
           0,
           mouse,
           grid,
-          level.cparts[i].a,
-          level.cparts[i].id,
+          filteredCoilComponents[i].a,
+          filteredCoilComponents[i].id,
           keyboard
         )
       );
@@ -460,89 +688,7 @@ function initBuild(level, ship) {
     all.push(new Rectangle(50, 70, 550, 550, "white"));
   }
 
-  // Rebuild the ship (if it exists)
-  if (ship) {
-    // Find the location of the command module (we want this at location 5,5) - if builder moved the command module :shrug:
-    let commandX = 0;
-    let commandY = 0;
-    for (let part of ship.parts) {
-      if (part instanceof CommandModule) {
-        commandX = part.x / PPM;
-        commandY = part.y / PPM;
-        break;
-      }
-    }
-    for (let part of ship.parts) {
-      let gridX = 5 - commandX + part.x / PPM;
-      let gridY = 5 - commandY + part.y / PPM;
-      all.push(part);
-      grid.addComponent(part, gridX, gridY);
-    }
-  } else {
-    let commandModule = newComponent(500, 500, 0, mouse, grid, null, 0);
-    all.push(commandModule);
-    grid.addComponent(commandModule, 5, 5, mouse);
-  }
-  /*
-  grid.addComponent(
-    newComponent(
-      1,
-      1,
-      0,
-      mouse,
-      grid,
-      randomLetter(),
-      3, //randomIntFromInterval(1, getCount() - 1),
-      keyboard
-    ),
-    5 + 0,
-    5 + 1
-  );
-  grid.addComponent(
-    newComponent(
-      1,
-      1,
-      90,
-      mouse,
-      grid,
-      randomLetter(),
-      3, //randomIntFromInterval(1, getCount() - 1),
-      keyboard
-    ),
-    5 - 1,
-    5 + 0
-  );
-  grid.addComponent(
-    newComponent(
-      1,
-      1,
-      180,
-      mouse,
-      grid,
-      randomLetter(),
-      3, //randomIntFromInterval(1, getCount() - 1),
-      keyboard
-    ),
-    5 + 0,
-    5 - 1
-  );
-  grid.addComponent(
-    newComponent(
-      1,
-      1,
-      270,
-      mouse,
-      grid,
-      randomLetter(),
-      3, //randomIntFromInterval(1, getCount() - 1),
-      keyboard
-    ),
-    5 + 1,
-    5 + 0
-  );
-  */
-  all.push(grid);
-  for (let i = 0; i < level.parts.length; i++) {
+  for (let i = 0; i < filteredLevelComponents.length; i++) {
     all.push(
       newComponent(
         60 + (i % 5) * 102,
@@ -550,8 +696,8 @@ function initBuild(level, ship) {
         0,
         mouse,
         grid,
-        level.parts[i].a,
-        level.parts[i].id,
+        filteredLevelComponents[i].a,
+        filteredLevelComponents[i].id,
         keyboard
       )
     );
@@ -606,7 +752,12 @@ function initFly(grid, level) {
   let chron = new Chronometer(WIDTH - 300, HEIGHT - 20, hud);
   hud.add(chron);
 
+  playMusic();
+
   let onCrash = (x, y, crashedShip, counter) => {
+    // Play crash sound!
+    zzfx(...[1.02,,605,.04,.02,.49,4,4.41,.6,.4,,,,.1,,.8,,.43,.16]);
+
     // Add flaming particles right under the PlanetGround
     let start = 0;
     for (let i = 0; i < actors.length; i++) {
@@ -615,21 +766,25 @@ function initFly(grid, level) {
       }
     }
 
-    toAdd.push({
-      at: start,
-      value: new DirectionalParticle(
-        x,
-        y + PPM / 2,
-        0,
-        2, // Something
-        2, // Frequency
-        50, // Length
-        10, // Size
-        FIRE_COLORS,
-        10, // Spread
-        3 // Particle velocity
-      ),
-    });
+    // Add a fireball for each corner
+    let shipPoints = crashedShip.getSceneCoordsOfParts();
+    for (let i = 0; i < shipPoints.length; i++) {
+      toAdd.push({
+        at: start,
+        value: new DirectionalParticle(
+          shipPoints[i].x,
+          WIDTH / 2 - 1, // Copied from PlanetGround TODO: DRY
+          0,
+          2, // Something
+          2, // Frequency
+          50, // Length
+          10, // Size
+          FIRE_COLORS,
+          10, // Spread
+          3 // Particle velocity
+        ),
+      });
+    }
 
     // Show the defeat screen
     hud.add(
@@ -699,8 +854,12 @@ function initFly(grid, level) {
     );
   };
 
+  let ground = new PlanetGround(level);
+
   let all = [];
   let ship = new Ship(WIDTH / 2, (HEIGHT * 2) / 3, grid, keyboard, onCrash);
+  ship.y = ground.y - (ship.h + DIM); // One block above the ground
+
   let station = new SpaceStation(level, ship, function (counter) {
     // Show the victory screen
     let finishTime = new Date();
@@ -789,7 +948,8 @@ function initFly(grid, level) {
               () => {
                 actors = initMainMenu();
               },
-              true
+              true,
+              15
             )
           );
         })
@@ -820,8 +980,6 @@ function initFly(grid, level) {
     }
   });
 
-  let ground = new PlanetGround(level);
-
   hud.add(new PlanetInfo(50, 70, level));
   hud.add(new Speedometer(20, HEIGHT - 20, ship, ground));
   hud.add(new StationTracker(ship, station, mouse));
@@ -848,6 +1006,11 @@ function initFly(grid, level) {
   all.push(new PlanetAtmosphere(level.atmh));
   all.push(ground);
   all.push(station);
+
+  // Add Scaffolding for each ship bloc on the x axis
+  for (let part of ship.parts) {
+    all.push(new Scaffolding(ship.x + part.x, ground.y - DIM));
+  }
 
   all.push(ship);
   mouse.coll = station;
@@ -890,6 +1053,8 @@ canvasElem.addEventListener("mousemove", function (e) {
 document.addEventListener(
   "keydown",
   (event) => {
+    //zzfx(...[,,925,.04,.3,.6,1,.3,,6.27,-184,.09,.17]);
+
     //console.log("Down", event.key);
     keyboard.add(event.key);
   },

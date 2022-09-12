@@ -143,3 +143,36 @@ export function randomRange(min, max) {
 export function unicode(hex) {
   return String.fromCharCode(parseInt(hex, 16));
 }
+
+export function playThrust(vol,bit) {
+  zzfx(...[vol,.3,444,,.29,.23,2,3.6,,,,,.15,1,-15,bit,,.3]); // Explosion 90
+}
+
+// Keep this global so we don't have multiple beepers happening
+let beep = undefined;
+export function startBeep() {
+  beep = setInterval(()=>{zzfx(...[1.27,0,440,.01,.01,.01,,2.58,,.3,,.05,.04,,.1,-0.1,,.6,.01]);}, 200)
+}
+export function stopBeep() {
+  clearInterval(beep);
+}
+
+let audioNode = undefined;
+export function playMusic() {
+  // Create a song
+  let song = [[[,0,400,,.06,.13,,.21,.5,,,.05,.19,,.7,,.16,,.03,.38],[,0]],[[[,,5,5,10,5,12,,10,5,,10,10,5,12,12,10,8,3,3,8,3,10,,8,3,,3,8,3,10,10,8,6]]],[0],50,{"title":"Background","instruments":["Instrument 0","Instrument 1"],"patterns":["Pattern 0"]}]
+  let mySongData = zzfxM(...song);
+  // Play the song (returns a AudioBufferSourceNode)
+  audioNode = zzfxP(...mySongData);
+  audioNode.loop = true;
+  //setInterval(()=>{myAudioNode.playbackRate = 5; console.log("Updated", myAudioNode.playbackRate)}, 1500)
+  //console.log("PLAYING!!!")
+  // Stop the song
+  //myAudioNode.stop();
+}
+
+export function stopMusic() {
+  if(audioNode) {
+    audioNode.stop();
+  }
+}

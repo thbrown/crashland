@@ -16,6 +16,7 @@ export class PlanetGround extends Actor {
     ctx.fillStyle = this.level.pc;
     ctx.fillRect(this.x, this.y, this.w, this.h);
   }
+  
 
   update() {}
 }

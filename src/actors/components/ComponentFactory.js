@@ -30,3 +30,7 @@ export function newComponent(
   let Type = TYPES[typeIndex];
   return new Type(x, y, angle, mouse, grid, key, keyboard);
 }
+
+export function getType(id) {
+  return TYPES[id];
+}

@@ -19,6 +19,10 @@ export class Keyboard extends Actor {
     this.keys.delete(toRemove);
   }
 
+  length() {
+    return this.keys.size;
+  }
+
   draw(ctx) {}
 
   update() {}

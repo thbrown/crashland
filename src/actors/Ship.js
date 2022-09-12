@@ -15,6 +15,7 @@ export class Ship extends Actor {
     this.xAdj = 0;
     this.collide = true;
     this.freeze = false;
+    this.keyboardFreeze = true;
     this.onCrash = onCrash;
 
     // Add all components
@@ -229,8 +230,12 @@ export class Ship extends Actor {
       part.update(collisions, globalCounter);
     }
 
+    if(this.keyboardFreeze && this.keyboard.length() > 0) {
+      this.keyboardFreeze = false
+    }
+
     // Don't update anything if the ship is frozen
-    if(this.freeze) {
+    if(this.freeze || this.keyboardFreeze) {
       return;
     }
 
