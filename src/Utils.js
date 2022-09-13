@@ -202,6 +202,13 @@ export function stopMusic() {
   }
 }
 
+// Adjust playback rate
+export function adjMusic(val) {
+  if(audioNode) {
+    audioNode.playbackRate.value = val
+  }
+}
+
 export function f(v) {
   return `${v}px Helvetica`;
 }

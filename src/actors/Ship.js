@@ -7,7 +7,7 @@ import { PlanetGround } from "./PlanetGround";
 const mass = 100; // mass of one tile/square/part/component
 
 export class Ship extends Actor {
-  constructor(x, y, grid, keyboard, onCrash) {
+  constructor(x, y, grid, keyboard, level, onCrash) {
     super();
     this.parts = [];
     this.keyboard = keyboard;
@@ -17,6 +17,7 @@ export class Ship extends Actor {
     this.freeze = false;
     this.keyboardFreeze = true;
     this.onCrash = onCrash;
+    this.level = level;
 
     // Add all components
     for (let compKey of Object.keys(grid.components)) {
@@ -271,11 +272,11 @@ export class Ship extends Actor {
 
     // TODO: make these altitude dependent
     // Adjust velocity for gravity
-    this.vy += .01;
+    this.vy += .01 * this.level.pg;
 
     // Adjust velocity for drag
-    this.vx = this.vx * .999;
-    this.vy = this.vy * .999;
+    this.vx = this.vx * .999 * this.level.pa;
+    this.vy = this.vy * .999 * this.level.pa;
 
     // Now apply velocity to the ship
     this.x += this.vx;

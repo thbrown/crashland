@@ -1,11 +1,13 @@
 import { Actor } from "./Actor";
 import { collide } from "../Utils";
+import { randomIntFromInterval } from "../Utils";
 
 export class HUD extends Actor {
   constructor() {
     super();
     this.elements = [];
     this.startTime = new Date();
+    this.s = 0;
   }
 
   clear() {
@@ -19,6 +21,7 @@ export class HUD extends Actor {
   draw(ctx) {
     for (let element of this.elements) {
       ctx.save();
+      ctx.translate(randomIntFromInterval(-this.s, this.s), randomIntFromInterval(-this.s, this.s));
       element.draw(ctx);
       ctx.restore();
     }

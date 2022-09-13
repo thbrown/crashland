@@ -47,7 +47,7 @@ export class SmallThruster extends Component {
     this.particles.angle = this.angle + 180;
     this.particles.update(collisions, globalCounter);
     if (this.keyboard.has(this.key)) {
-      playThrust(0.3, .2);
+      playThrust(0.3, .8);
     }
   }
 

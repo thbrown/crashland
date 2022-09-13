@@ -27,7 +27,7 @@ import { CommandModule } from "./actors/components/CommandModule.js";
 import { Scaffolding } from "./actors/Scaffolding.js";
 
 import { WIDTH, HEIGHT, FIRE_COLORS, PPM, DIM } from "./Constants.js";
-import { randomIntFromInterval, collide, unicode, stopBeep, playMusic, stopMusic, sound, f } from "./Utils.js";
+import { randomIntFromInterval, collide, unicode, stopBeep, playMusic, stopMusic, sound, f, stopCountBeep, randomLetter } from "./Utils.js";
 import { Chronometer } from "./actors/Chronometer.js";
 import { PlanetInfo } from "./actors/PlanetInfo.js";
 
@@ -198,46 +198,13 @@ window.zzfxM = (n, f, t, e = 125) => {
 const levels = [
   {
     n: 0,
-    pn: "Test", // Planet name
-    pg: 1, // Planet gravity
-    pa: 1, // Planet atmosphere
-    pc: "brown", // Planet color
-    parts: [
-      // Ship components
-      { id: 2, a: "ArrowLeft" },
-      { id: 2, a: "ArrowRight" },
-      { id: 2, a: "ArrowUp" },
-      { id: 2, a: "ArrowDown" },
-      { id: 4 },
-    ],
-    cparts: [
-      // Bonus Coil ship components
-      { id: 2, a: "s" },
-    ],
-    sx: 500, // Space station X coord
-    sy: 300, // Space station Y coord
-    sm: 300, // Space station docking margin
-    st: 100, // Space station docking time
-    t: 30, // Max time to doc
-    atmh: -2000, // Atmosphere height in px
-  },
-  {
-    n: 1,
     pn: "Recta", // Planet name
-    pc: "yellow",
+    pc: "green",
     pg: 1, // Planet gravity
     pa: 1, // Planet atmosphere
     parts: [
       // Ship components
-      { id: 1, a: "a" },
-      { id: 2, a: "b" },
-      { id: 3, a: "c" },
-      { id: 4 },
-      { id: 4 },
-      { id: 4 },
-      { id: 4 },
-      { id: 4 },
-      { id: 4 },
+      { id: 1, a: "a" }
     ],
     cparts: [
       // Bonus Coil ship components
@@ -247,11 +214,11 @@ const levels = [
     sy: -1500, // Space station Y coord
     sm: 100, // Space station docking margin
     st: 100, // Space station docking time
-    t: 15,
+    t: 45, // Time to dock ins seconds
     atmh: -2000, // Atmosphere height in px
   },
   {
-    n: 2,
+    n: 1,
     pn: "Vi",
     pg: 1, // Planet Gravity
     pa: 1, // Planet Atmosphere
@@ -264,24 +231,47 @@ const levels = [
       { id: 4 },
       { id: 4 },
       { id: 4 },
-      { id: 4 },
     ],
     cparts: [
       { id: 2, a: "ArrowLeft" },
       { id: 2, a: "ArrowRight" },
       { id: 2, a: "ArrowUp" },
       { id: 2, a: "ArrowDown" },
+      { id: 4 },
     ],
-    sx: 500,
-    sy: 400,
-    sm: 300,
-    st: 300,
-    t: 30,
+    sx: -500,
+    sy: -1500,
+    sm: 75,
+    st: 200,
+    t: 45,
     atmh: -2000,
   },
   {
+    n: 2,
+    pn: "Stickious Kezious", // Planet name
+    pg: 2, // Planet gravity
+    pa: 1, // Planet atmosphere
+    pc: "darkgreen",
+    parts: [
+      // Ship components
+      { id: 3, a: "Shift" },
+      { id: 2, a: "g" },
+      { id: 4 },
+    ],
+    cparts: [
+      // Bonus Coil ship components
+      { id: 4 },
+    ],
+    sx: 1500, // Space station X coord
+    sy: -2000, // Space station Y coord
+    sm: 300, // Space station docking margin
+    st: 100, // Space station docking time
+    t: 25,
+    atmh: -2000, // Atmosphere height in px
+  },
+  {
     n: 3,
-    pn: "Coruscant", // Planet name
+    pn: "Libra", // Planet name
     pg: 1, // Planet gravity
     pa: 1, // Planet atmosphere
     pc: "grey",
@@ -298,14 +288,168 @@ const levels = [
       { id: 2, a: "s" },
       { id: 2, a: "S" },
     ],
-    sx: 500, // Space station X coord
-    sy: 300, // Space station Y coord
+    sx: 300, // Space station X coord
+    sy: -600, // Space station Y coord
     sm: 300, // Space station docking margin
-    st: 100, // Space station docking time
+    st: 300, // Space station docking time
     t: 30,
     atmh: -2000, // Atmosphere height in px
   },
+  {
+    n: 4,
+    pn: "Gemini", // Planet name
+    pg: .1, // Planet gravity
+    pa: 1, // Planet atmosphere
+    pc: "royalblue",
+    parts: [
+      // Ship components
+      { id: 1, a: "a" },
+      { id: 3, a: "b" },
+      { id: 2, a: "b" },
+      { id: 2, a: "a" },
+      { id: 4 },
+    ],
+    cparts: [
+      // Bonus Coil ship components
+      { id: 3, a: "b" },
+      { id: 1, a: "a" },
+      { id: 4 },
+    ],
+    sx: 1500, // Space station X coord
+    sy: -2000, // Space station Y coord
+    sm: 300, // Space station docking margin
+    st: 100, // Space station docking time
+    t: 25,
+    atmh: -2000, // Atmosphere height in px
+  },
+  {
+    n: 5,
+    pn: "Sumo", // Planet name
+    pg: 30, // Planet gravity
+    pa: 1, // Planet atmosphere
+    pc: "yellowgreen",
+    parts: [
+      // Ship components
+      { id: 3, a: "q" },
+      { id: 3, a: "p" },
+      { id: 3, a: "n" },
+      { id: 3, a: "m" },
+      { id: 3, a: "q" },
+      { id: 3, a: "ArrowUp" },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+    ],
+    cparts: [
+      // Bonus Coil ship components
+      { id: 3, a: "m" },
+      { id: 3, a: "q" },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+    ],
+    sx: 3000, // Space station X coord
+    sy: -2000, // Space station Y coord
+    sm: 300, // Space station docking margin
+    st: 100, // Space station docking time
+    t: 45,
+    atmh: -2000, // Atmosphere height in px
+  },
+  {
+    n: 6,
+    pn: "Idelia", // Planet name
+    pg: 3, // Planet gravity
+    pa: 1, // Planet atmosphere
+    pc: "olive",
+    parts: [
+      // Ship components
+      { id: 3, a: "ArrowUp" },
+      { id: 3, a: "ArrowDown" },
+      { id: 3, a: "ArrowLeft" },
+      { id: 3, a: "ArrowRight" },
+      { id: 2, a: "w" },
+      { id: 2, a: "s" },
+      { id: 2, a: "a" },
+      { id: 2, a: "d" },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+    ],
+    cparts: [
+      // Bonus Coil ship components
+      { id: 1, a: "h" },
+      { id: 1, a: "j" },
+      { id: 1, a: "k" },
+      { id: 1, a: "l" },
+      { id: 4 },
+    ],
+    sx: -1500, // Space station X coord
+    sy: -2000, // Space station Y coord
+    sm: 25, // Space station docking margin
+    st: 500, // Space station docking time
+    t: 200,
+    atmh: -2000, // Atmosphere height in px
+  },
+  {
+    n: 7,
+    pn: "Omega", // Planet name
+    pg: 1, // Planet gravity
+    pa: 1, // Planet atmosphere
+    pc: "tan",
+    parts: [
+      // Ship components
+      { id: randomIntFromInterval(1,3), a: randomLetter() },
+      { id: randomIntFromInterval(1,3), a: randomLetter() },
+      { id: randomIntFromInterval(1,3), a: randomLetter() },
+      { id: randomIntFromInterval(1,3), a: randomLetter() },
+      { id: randomIntFromInterval(1,3), a: randomLetter() },
+      { id: randomIntFromInterval(1,3), a: randomLetter() },
+      { id: randomIntFromInterval(1,3), a: randomLetter() },
+      { id: randomIntFromInterval(1,3), a: randomLetter() },
+      { id: randomIntFromInterval(1,3), a: randomLetter() },
+      { id: randomIntFromInterval(1,3), a: randomLetter() },
+      { id: randomIntFromInterval(1,3), a: randomLetter() },
+      { id: randomIntFromInterval(1,3), a: randomLetter() },
+      { id: randomIntFromInterval(1,3), a: randomLetter() },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+    ],
+    cparts: [
+      // Bonus Coil ship components
+      { id: randomIntFromInterval(1,3), a: randomLetter() },
+      { id: randomIntFromInterval(1,3), a: randomLetter() },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+    ],
+    sx: 1500, // Space station X coord
+    sy: -2000, // Space station Y coord
+    sm: 50, // Space station docking margin
+    st: 500, // Space station docking time
+    t: 200,
+    atmh: -2000, // Atmosphere height in px
+  },
 ];
+
+window.cheat = function() {
+  localStorage.setItem("ML", levels.length - 1);
+}
 
 const canvasElem = document.querySelector("canvas");
 const ctx = canvasElem.getContext("2d");
@@ -488,7 +632,7 @@ function initMainMenu() {
                     actors.push(
                       new Text(
                         20,
-                        310,
+                        320,
                         "However, the same can't be said for your spaceship.",
                         f(39)
                       )
@@ -589,6 +733,7 @@ function initBuild(level, rebuildShip) {
   hud.clear();
   stopBeep();
   stopMusic();
+  stopCountBeep();
   centeredActor = undefined;
   background.fadeStart = undefined;
   background.color = "black";
@@ -751,6 +896,8 @@ function initBuild(level, rebuildShip) {
 function initFly(grid, level) {
   hud.clear();
   hud.resetTimer();
+  hud.s = 0;
+  keyboard.clear();
 
   playMusic();
 
@@ -803,7 +950,7 @@ function initFly(grid, level) {
           new Text(
             WIDTH / 2,
             HEIGHT * 0.25,
-            `You did not survive (${reason})`,
+            `You did not survive (${reason === timeout ? "you ran out of time" : "you crashed"})`,
             f(40),
             true
           )
@@ -815,11 +962,11 @@ function initFly(grid, level) {
       new Future(globalCounter, 150, null, () => {
         hud.add(
           new Button(
-            WIDTH / 2 - 20,
+            WIDTH / 2 - 30,
             HEIGHT * 0.45,
             200,
             50,
-            "Try Again?",
+            "Try Again",
             "black",
             "white",
             f(35),
@@ -828,7 +975,8 @@ function initFly(grid, level) {
             () => {
               actors = initBuild(levels[level.n], crashedShip);
             },
-            true
+            true,
+            30
           )
         );
       })
@@ -862,7 +1010,7 @@ function initFly(grid, level) {
   let ground = new PlanetGround(level);
 
   let all = [];
-  let ship = new Ship(WIDTH / 2, (HEIGHT * 2) / 3, grid, keyboard, onDefeat);
+  let ship = new Ship(WIDTH / 2, (HEIGHT * 2) / 3, grid, keyboard, level, onDefeat);
   ship.y = ground.y - (ship.h + DIM); // One block above the ground
 
   let chron = new Chronometer(WIDTH - 300, HEIGHT - 20, hud, level, ship, onDefeat);
@@ -873,7 +1021,7 @@ function initFly(grid, level) {
     // Show the victory screen
     let finishTime = new Date();
     let elapsedTimeMs = Math.abs(finishTime - hud.startTime) / 1000;
-    chron.freeze(elapsedTimeMs);
+    chron.freeze();
     localStorage.setItem(
       "ML",
       Math.max(level.n + 1, localStorage.getItem("ML"))
@@ -1037,7 +1185,7 @@ function initFly(grid, level) {
       70,
       48,
       48,
-      unicode("27F3"),
+      unicode("27F3"), // Refresh arrow
       "black",
       "white",
       f(48),
@@ -1121,6 +1269,11 @@ function initFly(grid, level) {
   centeredActor = ship;
   return all;
 }
+
+/*
+initHs() {
+
+}*/
 
 CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
   if (w < 2 * r) r = w / 2;

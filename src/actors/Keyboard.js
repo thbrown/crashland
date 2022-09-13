@@ -23,6 +23,10 @@ export class Keyboard extends Actor {
     return this.keys.size;
   }
 
+  clear() {
+    this.keys = new Set();
+  }
+
   draw(ctx) {}
 
   update() {}

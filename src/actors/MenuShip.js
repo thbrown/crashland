@@ -33,7 +33,7 @@ export class MenuShip extends Actor {
     ctx.rotate(toRad(this.angle));
     ctx.translate(this.x + this.xShake, this.y + this.yShake);
     ctx.lineWidth = 3;
-    ctx.fillStyle = "white";
+    ctx.fillStyle = "gold";
     ctx.strokeStyle = "white";
     ctx.fill(SPACE_SHIP);
     ctx.restore();

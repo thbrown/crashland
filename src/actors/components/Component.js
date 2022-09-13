@@ -16,7 +16,7 @@ export class Component extends Actor {
     this.collide = true;
     this.mouse = mouse;
     this.grid = grid;
-    this.rot = new Rotate(45, 0, this);
+    this.rot = new Rotate(50, 0, this);
     this.onRelease = function () {
       let targetLocation = this.grid.getClosestValidLocation(this.x, this.y);
       if (targetLocation === undefined) {
@@ -38,7 +38,7 @@ export class Component extends Actor {
 
   draw(ctx) {
     ctx.save();
-    ctx.fillStyle = "blue";
+    ctx.fillStyle = "Black";
     ctx.strokeStyle = "white";
     ctx.lineWidth = 3;
 
@@ -58,7 +58,7 @@ export class Component extends Actor {
 
     // Draw
     ctx.translate(-this.w / 2, -this.h / 2);
-    ctx.fillStyle = "gold";
+    ctx.fillStyle = "Gold";
     ctx.fill(this.getSprite());
     ctx.restore();
 

@@ -225,7 +225,7 @@ export class SpaceStation extends Actor {
               stopBeep();
               stopMusic();
               this.initVictory = false; // only do this once
-              this.textColor = "blue";
+              this.textColor = "mediumturquoise";
               this.ship.freeze = true;
               this.dockingText = "Docking COMPLETE!";
               sound([1.03,,221,.09,.24,.22,,.91,,,-2,.19,.11,,,.2,,.88,.17,.26]); 
