@@ -27,7 +27,18 @@ import { CommandModule } from "./actors/components/CommandModule.js";
 import { Scaffolding } from "./actors/Scaffolding.js";
 
 import { WIDTH, HEIGHT, FIRE_COLORS, PPM, DIM } from "./Constants.js";
-import { randomIntFromInterval, collide, unicode, stopBeep, playMusic, stopMusic, sound, f, stopCountBeep, randomLetter } from "./Utils.js";
+import {
+  randomIntFromInterval,
+  collide,
+  unicode,
+  stopBeep,
+  playMusic,
+  stopMusic,
+  sound,
+  f,
+  stopCountBeep,
+  randomLetter,
+} from "./Utils.js";
 import { Chronometer } from "./actors/Chronometer.js";
 import { PlanetInfo } from "./actors/PlanetInfo.js";
 
@@ -204,7 +215,7 @@ const levels = [
     pa: 1, // Planet atmosphere
     parts: [
       // Ship components
-      { id: 1, a: "a" }
+      { id: 1, a: "a" },
     ],
     cparts: [
       // Bonus Coil ship components
@@ -298,7 +309,7 @@ const levels = [
   {
     n: 4,
     pn: "Gemini", // Planet name
-    pg: .1, // Planet gravity
+    pg: 0.1, // Planet gravity
     pa: 1, // Planet atmosphere
     pc: "royalblue",
     parts: [
@@ -409,19 +420,19 @@ const levels = [
     pc: "tan",
     parts: [
       // Ship components
-      { id: randomIntFromInterval(1,3), a: randomLetter() },
-      { id: randomIntFromInterval(1,3), a: randomLetter() },
-      { id: randomIntFromInterval(1,3), a: randomLetter() },
-      { id: randomIntFromInterval(1,3), a: randomLetter() },
-      { id: randomIntFromInterval(1,3), a: randomLetter() },
-      { id: randomIntFromInterval(1,3), a: randomLetter() },
-      { id: randomIntFromInterval(1,3), a: randomLetter() },
-      { id: randomIntFromInterval(1,3), a: randomLetter() },
-      { id: randomIntFromInterval(1,3), a: randomLetter() },
-      { id: randomIntFromInterval(1,3), a: randomLetter() },
-      { id: randomIntFromInterval(1,3), a: randomLetter() },
-      { id: randomIntFromInterval(1,3), a: randomLetter() },
-      { id: randomIntFromInterval(1,3), a: randomLetter() },
+      { id: randomIntFromInterval(1, 3), a: randomLetter() },
+      { id: randomIntFromInterval(1, 3), a: randomLetter() },
+      { id: randomIntFromInterval(1, 3), a: randomLetter() },
+      { id: randomIntFromInterval(1, 3), a: randomLetter() },
+      { id: randomIntFromInterval(1, 3), a: randomLetter() },
+      { id: randomIntFromInterval(1, 3), a: randomLetter() },
+      { id: randomIntFromInterval(1, 3), a: randomLetter() },
+      { id: randomIntFromInterval(1, 3), a: randomLetter() },
+      { id: randomIntFromInterval(1, 3), a: randomLetter() },
+      { id: randomIntFromInterval(1, 3), a: randomLetter() },
+      { id: randomIntFromInterval(1, 3), a: randomLetter() },
+      { id: randomIntFromInterval(1, 3), a: randomLetter() },
+      { id: randomIntFromInterval(1, 3), a: randomLetter() },
       { id: 4 },
       { id: 4 },
       { id: 4 },
@@ -432,8 +443,8 @@ const levels = [
     ],
     cparts: [
       // Bonus Coil ship components
-      { id: randomIntFromInterval(1,3), a: randomLetter() },
-      { id: randomIntFromInterval(1,3), a: randomLetter() },
+      { id: randomIntFromInterval(1, 3), a: randomLetter() },
+      { id: randomIntFromInterval(1, 3), a: randomLetter() },
       { id: 4 },
       { id: 4 },
       { id: 4 },
@@ -447,9 +458,9 @@ const levels = [
   },
 ];
 
-window.cheat = function() {
+window.cheat = function () {
   localStorage.setItem("ML", levels.length - 1);
-}
+};
 
 const canvasElem = document.querySelector("canvas");
 const ctx = canvasElem.getContext("2d");
@@ -523,7 +534,7 @@ function clock() {
     }
   }
 
-  // Remove dead actors
+  // Remove dead actors (actors that returned true from their update functions)
   actors = actors.filter(function (el) {
     return toRemove.indexOf(el) < 0;
   });
@@ -649,12 +660,7 @@ function initMainMenu() {
                           )
                         );
                         actors.push(
-                          new Text(
-                            20,
-                            490,
-                            "[Press any key]",
-                            f(39)
-                          )
+                          new Text(20, 490, "[Press any key]", f(39))
                         );
                         // Queue Remove All & Show Build Screen
                         actors.push(
@@ -903,7 +909,27 @@ function initFly(grid, level) {
 
   let onDefeat = (crashedShip, counter, reason, chron) => {
     // Play crash sound!
-    sound([1.02,,605,.04,.02,.49,4,4.41,.6,.4,,,,.1,,.8,,.43,.16]);
+    sound([
+      1.02,
+      ,
+      605,
+      0.04,
+      0.02,
+      0.49,
+      4,
+      4.41,
+      0.6,
+      0.4,
+      ,
+      ,
+      ,
+      0.1,
+      ,
+      0.8,
+      ,
+      0.43,
+      0.16,
+    ]);
 
     // Lock time
     const timeout = "timeout";
@@ -923,8 +949,12 @@ function initFly(grid, level) {
       toAdd.push({
         at: start,
         value: new DirectionalParticle(
-          reason === timeout ? crashedShip.x + crashedShip.COM.x : shipPoints[i].x,
-          reason === timeout ? crashedShip.y + crashedShip.COM.y : WIDTH / 2 - 1, // Copied from PlanetGround TODO: DRY
+          reason === timeout
+            ? crashedShip.x + crashedShip.COM.x
+            : shipPoints[i].x,
+          reason === timeout
+            ? crashedShip.y + crashedShip.COM.y
+            : WIDTH / 2 - 1, // Copied from PlanetGround TODO: DRY
           0,
           2, // Something
           2, // Frequency
@@ -950,7 +980,9 @@ function initFly(grid, level) {
           new Text(
             WIDTH / 2,
             HEIGHT * 0.25,
-            `You did not survive (${reason === timeout ? "you ran out of time" : "you crashed"})`,
+            `You did not survive (${
+              reason === timeout ? "you ran out of time" : "you crashed"
+            })`,
             f(40),
             true
           )
@@ -1010,10 +1042,24 @@ function initFly(grid, level) {
   let ground = new PlanetGround(level);
 
   let all = [];
-  let ship = new Ship(WIDTH / 2, (HEIGHT * 2) / 3, grid, keyboard, level, onDefeat);
+  let ship = new Ship(
+    WIDTH / 2,
+    (HEIGHT * 2) / 3,
+    grid,
+    keyboard,
+    level,
+    onDefeat
+  );
   ship.y = ground.y - (ship.h + DIM); // One block above the ground
 
-  let chron = new Chronometer(WIDTH - 300, HEIGHT - 20, hud, level, ship, onDefeat);
+  let chron = new Chronometer(
+    WIDTH - 300,
+    HEIGHT - 20,
+    hud,
+    level,
+    ship,
+    onDefeat
+  );
   ship.chron = chron; // Ugg... circular ref, but I need to get this working
   hud.add(chron);
 
@@ -1031,19 +1077,19 @@ function initFly(grid, level) {
     stopBeep();
 
     // Update High Score
-    let remainingTime = (level.t - elapsedTimeMs);
+    let remainingTime = level.t - elapsedTimeMs;
     let score = remainingTime + 5 * ship.getCargoCount();
     let highScores = localStorage.getItem("HS");
     let prevHighScore = undefined;
     let jsonHighScores = undefined;
-    if(highScores) {
+    if (highScores) {
       jsonHighScores = JSON.parse(highScores);
       let bestScore = jsonHighScores[level.pn];
-      if(bestScore === undefined) {
+      if (bestScore === undefined) {
         jsonHighScores[level.pn] = score;
       } else {
         prevHighScore = jsonHighScores[level.pn];
-        if(score > bestScore) {
+        if (score > bestScore) {
           jsonHighScores[level.pn] = score;
         }
       }
@@ -1051,8 +1097,8 @@ function initFly(grid, level) {
       jsonHighScores = {};
       jsonHighScores[level.pn] = score;
     }
-    localStorage.setItem("HS", JSON.stringify(jsonHighScores))
-    
+    localStorage.setItem("HS", JSON.stringify(jsonHighScores));
+
     hud.add(new Confetti());
     hud.add(
       new Future(globalCounter, 100, null, () => {
@@ -1063,13 +1109,7 @@ function initFly(grid, level) {
     hud.add(
       new Future(globalCounter, 130, null, () => {
         hud.add(
-          new Text(
-            WIDTH / 2,
-            HEIGHT * 0.25,
-            "You survived!",
-            f(40),
-            true
-          )
+          new Text(WIDTH / 2, HEIGHT * 0.25, "You survived!", f(40), true)
         );
       })
     );
@@ -1118,15 +1158,23 @@ function initFly(grid, level) {
           new Text(
             WIDTH / 2,
             HEIGHT * 0.65,
-            prevHighScore === undefined || score > prevHighScore ? `New record (${prevHighScore === undefined ? `no previous record` : `beat ${prevHighScore.toFixed(3)}`})` : `Record is ${prevHighScore.toFixed(3)}`,
+            prevHighScore === undefined || score > prevHighScore
+              ? `New record (${
+                  prevHighScore === undefined
+                    ? `no previous record`
+                    : `beat ${prevHighScore.toFixed(3)}`
+                })`
+              : `Record is ${prevHighScore.toFixed(3)}`,
             f(25),
             true,
-            prevHighScore === undefined || score > prevHighScore? "yellow" : "lightgrey"
+            prevHighScore === undefined || score > prevHighScore
+              ? "yellow"
+              : "lightgrey"
           )
         );
       })
     );
-    if (level.n >= (levels.length - 1)) {
+    if (level.n >= levels.length - 1) {
       hud.add(
         new Future(globalCounter, 150, null, () => {
           hud.add(
@@ -1188,14 +1236,14 @@ function initFly(grid, level) {
       unicode("27F3"), // Refresh arrow
       "black",
       "white",
-      f(48),
-      36,
+      f(35),
+      36, // y offset
       mouse,
       function () {
         actors = initBuild(level, ship);
       },
       true,
-      13
+      12 // x offset
     )
   );
 
@@ -1203,31 +1251,31 @@ function initFly(grid, level) {
   let addMuteButtonOne = function () {
     hud.add(
       new Button(
-        WIDTH - 160,
+        WIDTH - 160 - (localStorage.getItem("MO") == "t" ? 0 : 9),
         70,
         48,
         48,
-        localStorage.getItem("MO") == "t" ? '\u{1F507}' : '\u{1F508}', // Speaker
+        localStorage.getItem("MO") == "t" ? "\u{1F507}" : "\u{1F508}", // Speaker
         "black",
         "white",
         f(35),
-        36,
+        36, // y offset
         mouse,
         function () {
-          if(localStorage.getItem("MO") == "t") {
-            localStorage.setItem("MO","f");
+          if (localStorage.getItem("MO") == "t") {
+            localStorage.setItem("MO", "f");
             playMusic();
           } else {
-            localStorage.setItem("MO","t");
+            localStorage.setItem("MO", "t");
             stopMusic();
           }
           addMuteButtonOne();
         },
         true,
-        12
+        localStorage.getItem("MO") == "t" ? 3 : 10
       )
     );
-  }
+  };
   addMuteButtonOne();
   let addMuteButtonTwo = function () {
     hud.add(
@@ -1236,21 +1284,24 @@ function initFly(grid, level) {
         70,
         48,
         48,
-        localStorage.getItem("MT") == "t" ? '\u{1F515}' : '\u{1F514}', // Bell
+        localStorage.getItem("MT") == "t" ? "\u{1F515}" : "\u{1F514}", // Bell
         "black",
         "white",
         f(35),
         36,
         mouse,
         function () {
-          localStorage.setItem("MT", localStorage.getItem("MT") == "t" ? "f" : "t");
+          localStorage.setItem(
+            "MT",
+            localStorage.getItem("MT") == "t" ? "f" : "t"
+          );
           addMuteButtonTwo();
         },
         true,
-        8
+        localStorage.getItem("MT") == "t" ? 2 : 5
       )
     );
-  }
+  };
   addMuteButtonTwo();
 
   all.push(new PlanetAtmosphere(level.atmh));

@@ -1,11 +1,18 @@
 ## Spaceship Resurrection
 
-JS13k game about a ship that crashes and needs to be rebuild to save the crew
+JS13k game about a ship that crashes and needs to be rebuilt to save the crew
+
+## Prerequisites
+
+1. install node
+2. install npm
 
 ## To run
 
 `npm install`
 `npm run build-dev`
+
+Then open `./dist/index.html` in your browser
 
 ## Other Scripts
 
