@@ -227,9 +227,47 @@ const levels = [
     st: 100, // Space station docking time
     t: 45, // Time to dock ins seconds
     atmh: -2000, // Atmosphere height in px
+    tip: "Press the key inside the component to activate it. Not working? check your CAPS LOCK key!",
   },
   {
     n: 1,
+    pn: "Libra",
+    pg: 1, // Planet Gravity
+    pa: 1, // Planet Atmosphere
+    pc: "orange",
+    parts: [
+      { id: 2, a: "a" },
+      { id: 2, a: "d" },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+      { id: 4 },
+    ],
+    cparts: [
+      { id: 2, a: "ArrowLeft" },
+      { id: 2, a: "ArrowRight" },
+      { id: 2, a: "ArrowDown" },
+      { id: 4 },
+    ],
+    sx: 1500,
+    sy: -2700,
+    sm: 400,
+    st: 250,
+    t: 45,
+    atmh: -2000,
+    tip: "The more cargo you take with you, the more points you'll get for winning",
+  },
+  {
+    n: 2,
     pn: "Vi",
     pg: 1, // Planet Gravity
     pa: 1, // Planet Atmosphere
@@ -256,17 +294,19 @@ const levels = [
     st: 200,
     t: 45,
     atmh: -2000,
+    tip: "Click the rotation icon on side of a component before placing it to change its orientation",
   },
   {
-    n: 2,
-    pn: "Stickious Kezious", // Planet name
-    pg: 2, // Planet gravity
+    n: 3,
+    pn: "Coruscant", // Planet name
+    pg: 3.9, // Planet gravity
     pa: 1, // Planet atmosphere
-    pc: "darkgreen",
+    pc: "grey",
     parts: [
       // Ship components
-      { id: 3, a: "Shift" },
-      { id: 2, a: "g" },
+      { id: 2, a: "G" },
+      { id: 1, a: "g" },
+      { id: 1, a: "h" },
       { id: 4 },
     ],
     cparts: [
@@ -274,18 +314,19 @@ const levels = [
       { id: 4 },
     ],
     sx: 1500, // Space station X coord
-    sy: -2000, // Space station Y coord
+    sy: -1000, // Space station Y coord
     sm: 300, // Space station docking margin
     st: 100, // Space station docking time
-    t: 25,
+    t: 44,
     atmh: -2000, // Atmosphere height in px
+    tip: "To lock a component on: Press SHIFT, press <key>, release SHIFT, release <key>, Try it here.",
   },
   {
-    n: 3,
-    pn: "Libra", // Planet name
+    n: 4,
+    pn: "New Libra", // Planet name
     pg: 1, // Planet gravity
     pa: 1, // Planet atmosphere
-    pc: "grey",
+    pc: "#fada5e",
     parts: [
       // Ship components
       { id: 2, a: "s" },
@@ -305,9 +346,10 @@ const levels = [
     st: 300, // Space station docking time
     t: 30,
     atmh: -2000, // Atmosphere height in px
+    tip: "sOMETIMES IT MAY BE EASIER TO USE caps lock INSTEAD OF shift",
   },
   {
-    n: 4,
+    n: 5,
     pn: "Gemini", // Planet name
     pg: 0.1, // Planet gravity
     pa: 1, // Planet atmosphere
@@ -317,7 +359,6 @@ const levels = [
       { id: 1, a: "a" },
       { id: 3, a: "b" },
       { id: 2, a: "b" },
-      { id: 2, a: "a" },
       { id: 4 },
     ],
     cparts: [
@@ -332,41 +373,7 @@ const levels = [
     st: 100, // Space station docking time
     t: 25,
     atmh: -2000, // Atmosphere height in px
-  },
-  {
-    n: 5,
-    pn: "Sumo", // Planet name
-    pg: 30, // Planet gravity
-    pa: 1, // Planet atmosphere
-    pc: "yellowgreen",
-    parts: [
-      // Ship components
-      { id: 3, a: "q" },
-      { id: 3, a: "p" },
-      { id: 3, a: "n" },
-      { id: 3, a: "m" },
-      { id: 3, a: "q" },
-      { id: 3, a: "ArrowUp" },
-      { id: 4 },
-      { id: 4 },
-      { id: 4 },
-      { id: 4 },
-      { id: 4 },
-    ],
-    cparts: [
-      // Bonus Coil ship components
-      { id: 3, a: "m" },
-      { id: 3, a: "q" },
-      { id: 4 },
-      { id: 4 },
-      { id: 4 },
-    ],
-    sx: 3000, // Space station X coord
-    sy: -2000, // Space station Y coord
-    sm: 300, // Space station docking margin
-    st: 100, // Space station docking time
-    t: 45,
-    atmh: -2000, // Atmosphere height in px
+    tip: "Multiple components can be activated by the same button press",
   },
   {
     n: 6,
@@ -411,50 +418,65 @@ const levels = [
     st: 500, // Space station docking time
     t: 200,
     atmh: -2000, // Atmosphere height in px
+    tip: "Relax, you have plenty of time",
   },
   {
     n: 7,
-    pn: "Omega", // Planet name
-    pg: 1, // Planet gravity
+    pn: "Sumo", // Planet name
+    pg: 30, // Planet gravity
     pa: 1, // Planet atmosphere
-    pc: "tan",
+    pc: "yellowgreen",
     parts: [
       // Ship components
-      { id: randomIntFromInterval(1, 3), a: randomLetter() },
-      { id: randomIntFromInterval(1, 3), a: randomLetter() },
-      { id: randomIntFromInterval(1, 3), a: randomLetter() },
-      { id: randomIntFromInterval(1, 3), a: randomLetter() },
-      { id: randomIntFromInterval(1, 3), a: randomLetter() },
-      { id: randomIntFromInterval(1, 3), a: randomLetter() },
-      { id: randomIntFromInterval(1, 3), a: randomLetter() },
-      { id: randomIntFromInterval(1, 3), a: randomLetter() },
-      { id: randomIntFromInterval(1, 3), a: randomLetter() },
-      { id: randomIntFromInterval(1, 3), a: randomLetter() },
-      { id: randomIntFromInterval(1, 3), a: randomLetter() },
-      { id: randomIntFromInterval(1, 3), a: randomLetter() },
-      { id: randomIntFromInterval(1, 3), a: randomLetter() },
-      { id: 4 },
-      { id: 4 },
-      { id: 4 },
-      { id: 4 },
-      { id: 4 },
+      { id: 3, a: "w" },
+      { id: 3, a: "w" },
+      { id: 3, a: "n" },
+      { id: 3, a: "m" },
+      { id: 3, a: "q" },
+      { id: 3, a: "q" },
+      { id: 3, a: "ArrowUp" },
       { id: 4 },
       { id: 4 },
     ],
     cparts: [
       // Bonus Coil ship components
-      { id: randomIntFromInterval(1, 3), a: randomLetter() },
-      { id: randomIntFromInterval(1, 3), a: randomLetter() },
+      { id: 3, a: "m" },
+      { id: 3, a: "q" },
       { id: 4 },
       { id: 4 },
       { id: 4 },
     ],
+    sx: 3000, // Space station X coord
+    sy: -2000, // Space station Y coord
+    sm: 300, // Space station docking margin
+    st: 100, // Space station docking time
+    t: 45,
+    atmh: -2000, // Atmosphere height in px
+    tip: "Sumo wrestlers have a life expectancy ~20 years shorter than the avg Japanese male",
+  },
+  {
+    n: 8,
+    pn: "Stickious Kezious", // Planet name
+    pg: 2, // Planet gravity
+    pa: 1, // Planet atmosphere
+    pc: "darkgreen",
+    parts: [
+      // Ship components
+      { id: 3, a: "Shift" },
+      { id: 2, a: "g" },
+      { id: 4 },
+    ],
+    cparts: [
+      // Bonus Coil ship components
+      { id: 4 },
+    ],
     sx: 1500, // Space station X coord
     sy: -2000, // Space station Y coord
-    sm: 50, // Space station docking margin
-    st: 500, // Space station docking time
-    t: 200,
+    sm: 300, // Space station docking margin
+    st: 100, // Space station docking time
+    t: 25,
     atmh: -2000, // Atmosphere height in px
+    tip: "The up arrow icon here is the SHIFT key",
   },
 ];
 
@@ -892,6 +914,18 @@ function initBuild(level, rebuildShip) {
       () => {
         actors = initFly(grid, level);
       }
+    )
+  );
+
+  all.push(new Text(30, 660, `Planet: ${level.pn}`, f(20), false, level.pc));
+  all.push(
+    new Text(
+      30,
+      690,
+      level.tip ? "Tip: " + level.tip : "",
+      f(20),
+      false,
+      level.pc
     )
   );
 
