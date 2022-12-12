@@ -2,7 +2,11 @@
 
 JS13k game about a ship that crashes and needs to be rebuilt to save the crew
 
-Player here: https://dev.js13kgames.com/games/spaceship-resurrection
+Play the original here: https://dev.js13kgames.com/games/spaceship-resurrection (placed 49th out of 151 entries)
+
+In the updated version (post competition) I added some help text, fixed some button alignment issues, and, most importantly, re-designed most of the levels. The original game was much too difficult after level 1. I would have liked to have made these changes before the competition but I ran out of time!
+
+Play the updated version here: https://thbrown.github.io/spaceship-resurrection/
 
 ## Prerequisites
 
