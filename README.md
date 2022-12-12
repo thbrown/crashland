@@ -1,6 +1,6 @@
 ## Spaceship Resurrection
 
-JS13k game about a ship that crashes and needs to be rebuilt to save the crew
+JS13k game about a ship that crashes and needs to be rebuilt to save the crew.
 
 Play the original here: https://dev.js13kgames.com/games/spaceship-resurrection (placed 49th out of 151 entries)
 

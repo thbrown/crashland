@@ -227,7 +227,7 @@ const levels = [
     st: 100, // Space station docking time
     t: 45, // Time to dock ins seconds
     atmh: -2000, // Atmosphere height in px
-    tip: "Press the key inside the component to activate it. Not working? check your CAPS LOCK key!",
+    tip: "Press the key inside the component to activate it. Not working? check CAPS LK!",
   },
   {
     n: 1,
